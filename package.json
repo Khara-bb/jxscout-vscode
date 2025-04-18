@@ -9,13 +9,34 @@
   "categories": [
     "Other"
   ],
-  "activationEvents": [],
+  "activationEvents": [
+    "onView:jxscoutAnalysis"
+  ],
   "main": "./dist/extension.js",
   "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "jxscout-sidebar",
+          "title": "jxscout Analysis",
+          "icon": "resources/jxscout.svg"
+        }
+      ]
+    },
+    "views": {
+      "jxscout-sidebar": [
+        {
+          "type": "tree",
+          "id": "jxscoutAnalysis",
+          "name": "Analysis Results"
+        }
+      ]
+    },
     "commands": [
       {
-        "command": "jxscout-vscode.helloWorld",
-        "title": "Hello World"
+        "command": "jxscout-vscode.refreshAnalysis",
+        "title": "Refresh Analysis",
+        "icon": "$(refresh)"
       }
     ]
   },
@@ -33,17 +54,23 @@
     "lint": "eslint src",
     "test": "vscode-test"
   },
+  "dependencies": {
+    "uuid": "^9.0.1",
+    "ws": "^8.18.1"
+  },
   "devDependencies": {
-    "@types/vscode": "^1.99.0",
     "@types/mocha": "^10.0.10",
     "@types/node": "20.x",
+    "@types/uuid": "^9.0.8",
+    "@types/vscode": "^1.99.0",
+    "@types/ws": "^8.18.1",
     "@typescript-eslint/eslint-plugin": "^8.28.0",
     "@typescript-eslint/parser": "^8.28.0",
-    "eslint": "^9.23.0",
-    "esbuild": "^0.25.1",
-    "npm-run-all": "^4.1.5",
-    "typescript": "^5.8.2",
     "@vscode/test-cli": "^0.0.10",
-    "@vscode/test-electron": "^2.4.1"
+    "@vscode/test-electron": "^2.4.1",
+    "esbuild": "^0.25.1",
+    "eslint": "^9.23.0",
+    "npm-run-all": "^4.1.5",
+    "typescript": "^5.8.2"
   }
 }
