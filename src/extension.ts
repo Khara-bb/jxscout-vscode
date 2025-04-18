@@ -31,7 +31,12 @@ export function activate(context: vscode.ExtensionContext) {
   // Register the tree view
   const treeView = vscode.window.createTreeView("jxscoutAnalysis", {
     treeDataProvider: treeProvider,
+    showCollapseAll: true,
+    canSelectMany: true, // Enable multi-selection
   });
+
+  // Set the tree view reference in the provider
+  treeProvider.setTreeView(treeView);
 
   // Connect to WebSocket server
   wsClient
@@ -75,12 +80,8 @@ export function activate(context: vscode.ExtensionContext) {
     "jxscout-vscode.highlightAndJump",
     async (filePath: string, range: vscode.Range) => {
       try {
-        const document = await vscode.workspace.openTextDocument(filePath);
-        const editor = await vscode.window.showTextDocument(document, {
-          selection: range,
-          preserveFocus: false,
-        });
-        treeProvider.highlightRange(editor, range);
+        // Use the new method that preserves focus
+        treeProvider.highlightAndJumpWithoutFocus(filePath, range);
       } catch (error) {
         vscode.window.showErrorMessage(
           `Failed to open file: ${
@@ -88,6 +89,14 @@ export function activate(context: vscode.ExtensionContext) {
           }`
         );
       }
+    }
+  );
+
+  // Register copy selected items command
+  const copySelectedCommand = vscode.commands.registerCommand(
+    "jxscout-vscode.copySelectedItems",
+    () => {
+      treeProvider.copySelectedItems();
     }
   );
 
@@ -140,6 +149,35 @@ export function activate(context: vscode.ExtensionContext) {
     }
   );
 
+  // Handle tree view selection changes
+  const selectionChangeDisposable = treeView.onDidChangeSelection((e) => {
+    // Handle selection changes
+    const selectedItems = e.selection;
+    const previouslySelectedItems = treeProvider.getSelectedItems();
+
+    // Clear previous selections that are no longer selected
+    for (const item of previouslySelectedItems) {
+      if (!selectedItems.includes(item)) {
+        treeProvider.handleSelection(item, false);
+      }
+    }
+
+    // Add new selections
+    for (const item of selectedItems) {
+      if (!previouslySelectedItems.includes(item)) {
+        treeProvider.handleSelection(item, true);
+      }
+    }
+  });
+
+  // Handle keyboard navigation
+  const keyboardDisposable = vscode.commands.registerCommand(
+    "jxscout-vscode.handleKeyNavigation",
+    (key: string) => {
+      treeProvider.handleKeyNavigation(key);
+    }
+  );
+
   // Function to update analysis for a file
   async function updateAnalysis(uri: vscode.Uri) {
     try {
@@ -159,8 +197,11 @@ export function activate(context: vscode.ExtensionContext) {
     refreshCommand,
     settingsCommand,
     highlightAndJumpCommand,
+    copySelectedCommand,
+    keyboardDisposable,
     configChangeDisposable,
     editorChangeDisposable,
+    selectionChangeDisposable,
     statusBarItem,
     treeProvider,
     {

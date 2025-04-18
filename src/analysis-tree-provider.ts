@@ -33,6 +33,8 @@ export class AnalysisTreeProvider
   private activeDecoration: vscode.TextEditorDecorationType | null = null;
   private activeEditor: vscode.TextEditor | null = null;
   private activeRange: vscode.Range | null = null;
+  private selectedItems: Set<AnalysisTreeItem> = new Set();
+  private treeView: vscode.TreeView<AnalysisTreeItem> | null = null;
 
   constructor() {
     // Create the decoration type
@@ -58,6 +60,11 @@ export class AnalysisTreeProvider
     });
   }
 
+  // Set the tree view reference
+  setTreeView(treeView: vscode.TreeView<AnalysisTreeItem>): void {
+    this.treeView = treeView;
+  }
+
   refresh(): void {
     this._onDidChangeTreeData.fire();
   }
@@ -65,12 +72,14 @@ export class AnalysisTreeProvider
   clearAnalysis(): void {
     this.currentAnalysis = null;
     this.clearHighlight();
+    this.selectedItems.clear();
     this.refresh();
   }
 
   updateAnalysis(analysis: AnalysisResult): void {
     this.currentAnalysis = analysis;
     this.clearHighlight();
+    this.selectedItems.clear();
     this.refresh();
   }
 
@@ -182,6 +191,121 @@ export class AnalysisTreeProvider
     this.activeEditor = editor;
     this.activeRange = range;
     editor.setDecorations(this.activeDecoration, [range]);
+  }
+
+  // Handle keyboard navigation
+  public handleKeyNavigation(key: string): void {
+    if (!this.treeView) return;
+
+    const selection = this.treeView.selection;
+    if (selection.length === 0) return;
+
+    const currentItem = selection[0];
+    let nextItem: AnalysisTreeItem | undefined;
+
+    if (key === "ArrowDown") {
+      nextItem = this.findNextItem(currentItem);
+    } else if (key === "ArrowUp") {
+      nextItem = this.findPreviousItem(currentItem);
+    }
+
+    if (nextItem) {
+      this.treeView.reveal(nextItem, { select: true, focus: true });
+    }
+  }
+
+  // Find the next item in the tree
+  private findNextItem(
+    currentItem: AnalysisTreeItem
+  ): AnalysisTreeItem | undefined {
+    if (!this.currentAnalysis) return undefined;
+
+    // Get all items in the tree
+    const allItems = this.getAllItems();
+    const currentIndex = allItems.findIndex((item) => item === currentItem);
+
+    if (currentIndex === -1 || currentIndex === allItems.length - 1) {
+      return undefined;
+    }
+
+    return allItems[currentIndex + 1];
+  }
+
+  // Find the previous item in the tree
+  private findPreviousItem(
+    currentItem: AnalysisTreeItem
+  ): AnalysisTreeItem | undefined {
+    if (!this.currentAnalysis) return undefined;
+
+    // Get all items in the tree
+    const allItems = this.getAllItems();
+    const currentIndex = allItems.findIndex((item) => item === currentItem);
+
+    if (currentIndex <= 0) {
+      return undefined;
+    }
+
+    return allItems[currentIndex - 1];
+  }
+
+  // Get all items in the tree
+  private getAllItems(): AnalysisTreeItem[] {
+    if (!this.currentAnalysis) return [];
+
+    const allItems: AnalysisTreeItem[] = [];
+    const analyzerNodes = this.createAnalyzerNodes();
+
+    for (const node of analyzerNodes) {
+      allItems.push(node);
+      if (node.children) {
+        allItems.push(...node.children);
+      }
+    }
+
+    return allItems;
+  }
+
+  // Handle selection
+  public handleSelection(item: AnalysisTreeItem, isSelected: boolean): void {
+    if (isSelected) {
+      this.selectedItems.add(item);
+    } else {
+      this.selectedItems.delete(item);
+    }
+  }
+
+  // Get all selected items
+  public getSelectedItems(): AnalysisTreeItem[] {
+    return Array.from(this.selectedItems);
+  }
+
+  // Copy selected items to clipboard
+  public copySelectedItems(): void {
+    const selectedItems = this.getSelectedItems();
+    if (selectedItems.length === 0) return;
+
+    const text = selectedItems.map((item) => item.label).join("\n");
+    vscode.env.clipboard.writeText(text);
+    vscode.window.showInformationMessage(
+      `Copied ${selectedItems.length} items to clipboard`
+    );
+  }
+
+  // Highlight and jump to code without changing focus
+  public highlightAndJumpWithoutFocus(
+    filePath: string,
+    range: vscode.Range
+  ): void {
+    vscode.workspace.openTextDocument(filePath).then((document) => {
+      vscode.window
+        .showTextDocument(document, {
+          selection: range,
+          preserveFocus: true, // Keep focus on the tree view
+        })
+        .then((editor) => {
+          this.highlightRange(editor, range);
+        });
+    });
   }
 
   public dispose(): void {

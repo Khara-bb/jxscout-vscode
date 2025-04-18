@@ -34,6 +34,22 @@
         }
       ]
     },
+    "menus": {
+      "view/title": [
+        {
+          "command": "jxscout-vscode.copySelectedItems",
+          "when": "view == jxscoutAnalysis",
+          "group": "navigation"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "jxscout-vscode.copySelectedItems",
+          "when": "view == jxscoutAnalysis",
+          "group": "inline"
+        }
+      ]
+    },
     "commands": [
       {
         "command": "jxscout-vscode.refreshAnalysis",
@@ -49,6 +65,39 @@
         "command": "jxscout-vscode.highlightAndJump",
         "title": "Highlight and Jump to Code",
         "when": "view == jxscoutAnalysis"
+      },
+      {
+        "command": "jxscout-vscode.copySelectedItems",
+        "title": "Copy Selected Items",
+        "icon": "$(copy)",
+        "when": "view == jxscoutAnalysis"
+      },
+      {
+        "command": "jxscout-vscode.handleKeyNavigation",
+        "title": "Handle Key Navigation",
+        "when": "view == jxscoutAnalysis"
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "jxscout-vscode.handleKeyNavigation",
+        "key": "up",
+        "when": "view == jxscoutAnalysis && !inputFocus"
+      },
+      {
+        "command": "jxscout-vscode.handleKeyNavigation",
+        "key": "down",
+        "when": "view == jxscoutAnalysis && !inputFocus"
+      },
+      {
+        "command": "jxscout-vscode.copySelectedItems",
+        "key": "ctrl+c",
+        "when": "view == jxscoutAnalysis && !inputFocus"
+      },
+      {
+        "command": "jxscout-vscode.copySelectedItems",
+        "key": "cmd+c",
+        "when": "view == jxscoutAnalysis && !inputFocus"
       }
     ],
     "configuration": {
