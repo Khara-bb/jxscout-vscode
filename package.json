@@ -45,8 +45,8 @@
       "view/item/context": [
         {
           "command": "jxscout-vscode.copySelectedItems",
-          "when": "view == jxscoutAnalysis",
-          "group": "inline"
+          "when": "view == jxscoutAnalysis && viewItem == jxscout-item",
+          "group": "1_modification"
         }
       ]
     },
@@ -68,7 +68,7 @@
       },
       {
         "command": "jxscout-vscode.copySelectedItems",
-        "title": "Copy Selected Items",
+        "title": "Copy Selected Values",
         "icon": "$(copy)",
         "when": "view == jxscoutAnalysis"
       },
