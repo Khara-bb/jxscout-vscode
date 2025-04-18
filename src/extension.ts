@@ -8,9 +8,25 @@ import * as path from "path";
 // This method is called when your extension is activated
 // Your extension is activated the very first time the command is executed
 export function activate(context: vscode.ExtensionContext) {
+  // Get configuration
+  const config = vscode.workspace.getConfiguration("jxscout");
+  const serverHost = config.get<string>("serverHost") || "localhost";
+  const serverPort = config.get<number>("serverPort") || 3333;
+  const serverUrl = `ws://${serverHost}:${serverPort}/ast-analyzer/ws`;
+
   // Initialize WebSocket client
-  const wsClient = new WebSocketClient("ws://localhost:8080/ws"); // Update with your server URL
+  const wsClient = new WebSocketClient(serverUrl);
   const treeProvider = new AnalysisTreeProvider();
+
+  // Create status bar item
+  const statusBarItem = vscode.window.createStatusBarItem(
+    vscode.StatusBarAlignment.Right,
+    100
+  );
+  statusBarItem.text = "$(sync) jxscout: Connecting...";
+  statusBarItem.tooltip = "jxscout Analysis";
+  statusBarItem.command = "jxscout-vscode.openSettings";
+  statusBarItem.show();
 
   // Register the tree view
   const treeView = vscode.window.createTreeView("jxscoutAnalysis", {
@@ -18,11 +34,19 @@ export function activate(context: vscode.ExtensionContext) {
   });
 
   // Connect to WebSocket server
-  wsClient.connect().catch((error: Error) => {
-    vscode.window.showErrorMessage(
-      `Failed to connect to jxscout server: ${error.message}`
-    );
-  });
+  wsClient
+    .connect()
+    .then(() => {
+      statusBarItem.text = "$(check) jxscout: Connected";
+      statusBarItem.tooltip = `Connected to ${serverUrl}`;
+    })
+    .catch((error: Error) => {
+      statusBarItem.text = "$(error) jxscout: Disconnected";
+      statusBarItem.tooltip = `Connection failed: ${error.message}`;
+      vscode.window.showErrorMessage(
+        `Failed to connect to jxscout server: ${error.message}`
+      );
+    });
 
   // Register refresh command
   const refreshCommand = vscode.commands.registerCommand(
@@ -31,6 +55,55 @@ export function activate(context: vscode.ExtensionContext) {
       const editor = vscode.window.activeTextEditor;
       if (editor) {
         await updateAnalysis(editor.document.uri);
+      }
+    }
+  );
+
+  // Register settings command
+  const settingsCommand = vscode.commands.registerCommand(
+    "jxscout-vscode.openSettings",
+    () => {
+      vscode.commands.executeCommand(
+        "workbench.action.openSettings",
+        "jxscout"
+      );
+    }
+  );
+
+  // Handle configuration changes
+  const configChangeDisposable = vscode.workspace.onDidChangeConfiguration(
+    (event) => {
+      if (event.affectsConfiguration("jxscout")) {
+        const newConfig = vscode.workspace.getConfiguration("jxscout");
+        const newServerHost =
+          newConfig.get<string>("serverHost") || "localhost";
+        const newServerPort = newConfig.get<number>("serverPort") || 8080;
+        const newServerUrl = `ws://${newServerHost}:${newServerPort}/ws`;
+
+        // Update status bar
+        statusBarItem.text = "$(sync) jxscout: Reconnecting...";
+        statusBarItem.tooltip = `Reconnecting to ${newServerUrl}`;
+
+        // Disconnect from old server
+        wsClient.disconnect();
+
+        // Update client with new URL
+        wsClient.updateServerUrl(newServerUrl);
+
+        // Reconnect to new server
+        wsClient
+          .connect()
+          .then(() => {
+            statusBarItem.text = "$(check) jxscout: Connected";
+            statusBarItem.tooltip = `Connected to ${newServerUrl}`;
+          })
+          .catch((error: Error) => {
+            statusBarItem.text = "$(error) jxscout: Disconnected";
+            statusBarItem.tooltip = `Connection failed: ${error.message}`;
+            vscode.window.showErrorMessage(
+              `Failed to connect to jxscout server: ${error.message}`
+            );
+          });
       }
     }
   );
@@ -58,11 +131,19 @@ export function activate(context: vscode.ExtensionContext) {
   }
 
   // Add disposables
-  context.subscriptions.push(treeView, refreshCommand, editorChangeDisposable, {
-    dispose: () => {
-      wsClient.disconnect();
-    },
-  });
+  context.subscriptions.push(
+    treeView,
+    refreshCommand,
+    settingsCommand,
+    configChangeDisposable,
+    editorChangeDisposable,
+    statusBarItem,
+    {
+      dispose: () => {
+        wsClient.disconnect();
+      },
+    }
+  );
 }
 
 // This method is called when your extension is deactivated

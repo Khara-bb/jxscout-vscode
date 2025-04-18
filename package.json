@@ -37,8 +37,27 @@
         "command": "jxscout-vscode.refreshAnalysis",
         "title": "Refresh Analysis",
         "icon": "$(refresh)"
+      },
+      {
+        "command": "jxscout-vscode.openSettings",
+        "title": "Open jxscout Settings"
       }
-    ]
+    ],
+    "configuration": {
+      "title": "jxscout",
+      "properties": {
+        "jxscout.serverHost": {
+          "type": "string",
+          "default": "localhost",
+          "description": "Hostname of the jxscout WebSocket server"
+        },
+        "jxscout.serverPort": {
+          "type": "number",
+          "default": 3333,
+          "description": "Port of the jxscout WebSocket server"
+        }
+      }
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run package",

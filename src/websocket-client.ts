@@ -2,9 +2,20 @@ import * as vscode from "vscode";
 import WebSocket from "ws";
 import { v4 as uuidv4 } from "uuid";
 
+export interface Position {
+  column: number;
+  line: number;
+}
+
+export interface Finding {
+  start: Position;
+  end: Position;
+  value: string;
+}
+
 export interface AnalysisResult {
   filePath: string;
-  results: { [key: string]: any };
+  results: Record<string, Finding[]>;
 }
 
 export class WebSocketClient {
@@ -13,8 +24,15 @@ export class WebSocketClient {
     new Map();
   private reconnectTimeout: NodeJS.Timeout | null = null;
   private readonly reconnectDelay = 5000; // 5 seconds
+  private serverUrl: string;
 
-  constructor(private serverUrl: string) {}
+  constructor(serverUrl: string) {
+    this.serverUrl = serverUrl;
+  }
+
+  updateServerUrl(newServerUrl: string): void {
+    this.serverUrl = newServerUrl;
+  }
 
   connect(): Promise<void> {
     return new Promise((resolve, reject) => {
@@ -78,6 +96,9 @@ export class WebSocketClient {
         break;
       case "error":
         console.error("Server error:", payload.message);
+        if (payload.message.includes("asset not found")) {
+          return; // ignore asset not found errors
+        }
         vscode.window.showErrorMessage(
           `jxscout analysis error: ${payload.message}`
         );

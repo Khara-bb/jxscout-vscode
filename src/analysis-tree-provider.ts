@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { AnalysisResult } from "./websocket-client";
+import { AnalysisResult, Finding } from "./websocket-client";
 
 export class AnalysisTreeItem extends vscode.TreeItem {
   constructor(
@@ -64,7 +64,7 @@ export class AnalysisTreeProvider
 
     for (const [analyzerType, matches] of Object.entries(results)) {
       if (Array.isArray(matches)) {
-        const matchItems = matches.map((match: any, index: number) => {
+        const matchItems = matches.map((match, index) => {
           const description = `Line ${match.start.line}:${match.start.column} - ${match.start.line}:${match.end.column}`;
           return new AnalysisTreeItem(
             `Match ${index + 1}`,
