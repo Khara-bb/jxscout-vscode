@@ -7,11 +7,13 @@ export class AnalysisTreeItem extends vscode.TreeItem {
     public readonly collapsibleState: vscode.TreeItemCollapsibleState,
     public readonly children?: AnalysisTreeItem[],
     public readonly description?: string,
-    public readonly tooltip?: string
+    public readonly tooltip?: string,
+    public readonly command?: vscode.Command
   ) {
     super(label, collapsibleState);
     this.description = description;
     this.tooltip = tooltip;
+    this.command = command;
   }
 }
 
@@ -60,24 +62,47 @@ export class AnalysisTreeProvider
     }
 
     const analyzerNodes: AnalysisTreeItem[] = [];
-    const { results } = this.currentAnalysis;
+    const { results, filePath } = this.currentAnalysis;
 
     for (const [analyzerType, matches] of Object.entries(results)) {
       if (Array.isArray(matches)) {
         const matchItems = matches.map((match, index) => {
           const description = `Line ${match.start.line}:${match.start.column} - ${match.start.line}:${match.end.column}`;
+
+          // Create a command to jump to the code location
+          const command: vscode.Command = {
+            title: "Jump to code",
+            command: "vscode.open",
+            arguments: [
+              vscode.Uri.file(filePath),
+              {
+                selection: new vscode.Range(
+                  match.start.line - 1, // Convert to 0-based line number
+                  match.start.column,
+                  match.end.line - 1, // Convert to 0-based line number
+                  match.end.column
+                ),
+              },
+            ],
+          };
+
           return new AnalysisTreeItem(
-            `Match ${index + 1}`,
+            `${match.value}`,
             vscode.TreeItemCollapsibleState.None,
             undefined,
             description,
-            `Value: ${match.value}`
+            `${match.value}`,
+            command
           );
         });
 
+        // Capitalize the analyzer name
+        const capitalizedAnalyzerType =
+          analyzerType.charAt(0).toUpperCase() + analyzerType.slice(1);
+
         analyzerNodes.push(
           new AnalysisTreeItem(
-            analyzerType,
+            capitalizedAnalyzerType,
             vscode.TreeItemCollapsibleState.Expanded,
             matchItems
           )
