@@ -70,6 +70,27 @@ export function activate(context: vscode.ExtensionContext) {
     }
   );
 
+  // Register highlight and jump command
+  const highlightAndJumpCommand = vscode.commands.registerCommand(
+    "jxscout-vscode.highlightAndJump",
+    async (filePath: string, range: vscode.Range) => {
+      try {
+        const document = await vscode.workspace.openTextDocument(filePath);
+        const editor = await vscode.window.showTextDocument(document, {
+          selection: range,
+          preserveFocus: false,
+        });
+        treeProvider.highlightRange(editor, range);
+      } catch (error) {
+        vscode.window.showErrorMessage(
+          `Failed to open file: ${
+            error instanceof Error ? error.message : String(error)
+          }`
+        );
+      }
+    }
+  );
+
   // Handle configuration changes
   const configChangeDisposable = vscode.workspace.onDidChangeConfiguration(
     (event) => {
@@ -137,9 +158,11 @@ export function activate(context: vscode.ExtensionContext) {
     treeView,
     refreshCommand,
     settingsCommand,
+    highlightAndJumpCommand,
     configChangeDisposable,
     editorChangeDisposable,
     statusBarItem,
+    treeProvider,
     {
       dispose: () => {
         wsClient.disconnect();

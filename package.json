@@ -18,7 +18,7 @@
       "activitybar": [
         {
           "id": "jxscout-sidebar",
-          "title": "jxscout Analysis",
+          "title": "jxscout",
           "icon": "resources/jxscout.svg"
         }
       ]
@@ -36,11 +36,17 @@
       {
         "command": "jxscout-vscode.refreshAnalysis",
         "title": "Refresh Analysis",
-        "icon": "$(refresh)"
+        "icon": "$(refresh)",
+        "when": "view == jxscoutAnalysis"
       },
       {
         "command": "jxscout-vscode.openSettings",
         "title": "Open jxscout Settings"
+      },
+      {
+        "command": "jxscout-vscode.highlightAndJump",
+        "title": "Highlight and Jump to Code",
+        "when": "view == jxscoutAnalysis"
       }
     ],
     "configuration": {
