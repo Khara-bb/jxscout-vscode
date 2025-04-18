@@ -129,6 +129,27 @@ export class WebSocketClient {
     });
   }
 
+  async forceReanalysis(filePath: string): Promise<AnalysisResult> {
+    return new Promise((resolve, reject) => {
+      if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
+        reject(new Error("WebSocket is not connected"));
+        return;
+      }
+
+      const messageId = uuidv4();
+      const message = {
+        type: "forceReanalysis",
+        id: messageId,
+        payload: {
+          filePath: filePath,
+        },
+      };
+
+      this.messageCallbacks.set(messageId, resolve);
+      this.ws.send(JSON.stringify(message));
+    });
+  }
+
   disconnect() {
     if (this.ws) {
       this.ws.close();

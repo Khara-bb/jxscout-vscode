@@ -10,7 +10,6 @@
     "Other"
   ],
   "activationEvents": [
-    "onView:jxscoutAnalysis"
   ],
   "main": "./dist/extension.js",
   "contributes": {
@@ -28,7 +27,10 @@
         {
           "type": "tree",
           "id": "jxscoutAnalysis",
-          "name": "Analysis Results"
+          "name": "Analysis Results",
+          "when": "true",
+          "buttons": [
+          ]
         }
       ]
     },
