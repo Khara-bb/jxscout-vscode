@@ -112,6 +112,8 @@ export function activate(context: vscode.ExtensionContext) {
   const editorChangeDisposable = vscode.window.onDidChangeActiveTextEditor(
     async (editor) => {
       if (editor) {
+        // Clear the analysis tree view before updating with new file
+        treeProvider.clearAnalysis();
         await updateAnalysis(editor.document.uri);
       }
     }

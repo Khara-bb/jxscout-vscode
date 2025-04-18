@@ -33,6 +33,11 @@ export class AnalysisTreeProvider
     this._onDidChangeTreeData.fire();
   }
 
+  clearAnalysis(): void {
+    this.currentAnalysis = null;
+    this.refresh();
+  }
+
   updateAnalysis(analysis: AnalysisResult): void {
     this.currentAnalysis = analysis;
     this.refresh();
