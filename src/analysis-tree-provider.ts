@@ -85,7 +85,19 @@ export class AnalysisTreeProvider
 
     if (!element) {
       // Root level - create analyzer type nodes
-      return Promise.resolve(this.createAnalyzerNodes());
+      const nodes = this.createAnalyzerNodes();
+
+      // If there are no findings at all, show the "No interesting stuff found" message
+      if (nodes.length === 0) {
+        const noFindingsItem = new AnalysisTreeItem(
+          "Nothing interesting was found",
+          vscode.TreeItemCollapsibleState.None,
+          undefined
+        );
+        return Promise.resolve([noFindingsItem]);
+      }
+
+      return Promise.resolve(nodes);
     }
 
     // Return children of the selected node
@@ -101,7 +113,8 @@ export class AnalysisTreeProvider
     const { results, filePath } = this.currentAnalysis;
 
     for (const [analyzerType, matches] of Object.entries(results)) {
-      if (Array.isArray(matches)) {
+      if (Array.isArray(matches) && matches.length > 0) {
+        // Only create nodes for categories with findings
         const matchItems = matches.map((match, index) => {
           // Create the range for this match
           const range = new vscode.Range(
