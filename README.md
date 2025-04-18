@@ -33,8 +33,7 @@ You can access these settings by:
 
 ## Requirements
 
-- VSCode 1.99.0 or higher
-- A running jxscout WebSocket server
+- A running jxscout >=0.6.0 server
 
 ## Extension Settings
 
@@ -43,11 +42,43 @@ This extension contributes the following settings:
 - `jxscout.serverHost`: Hostname of the jxscout WebSocket server
 - `jxscout.serverPort`: Port of the jxscout WebSocket server
 
-## Release Notes
+## Development
 
-### 0.0.1
+### Prerequisites
 
-Initial release of jxscout-vscode
+- Node.js and npm installed
+- VS Code
+- Recommended VS Code extensions:
+  - amodio.tsl-problem-matcher
+  - ms-vscode.extension-test-runner
+  - dbaeumer.vscode-eslint
+
+### Getting Started
+
+1. Clone the repository
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+3. Press `F5` to open a new window with your extension loaded
+4. Run your command from the command palette (`Ctrl+Shift+P` or `Cmd+Shift+P` on Mac)
+5. Set breakpoints in your code inside `src/extension.ts` to debug your extension
+6. Find output from your extension in the debug console
+
+### Making Changes
+
+- You can relaunch the extension from the debug toolbar after changing code
+- You can also reload (`Ctrl+R` or `Cmd+R` on Mac) the VS Code window with your extension to load your changes
+
+### Building the Extension
+
+To build the extension for distribution:
+
+```bash
+npm run compile
+```
+
+This will create a production build in the `dist` directory.
 
 ## Contributing
 
