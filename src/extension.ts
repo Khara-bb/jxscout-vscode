@@ -13,14 +13,25 @@ export function activate(context: vscode.ExtensionContext) {
   const analysisTreeProvider = new JxscoutTreeProvider("analysis");
   const explorerTreeProvider = new JxscoutTreeProvider("explorer");
 
-  vscode.window.registerTreeDataProvider(
-    "jxscoutAstView",
-    analysisTreeProvider
-  );
-  vscode.window.registerTreeDataProvider(
-    "jxscoutFileView",
-    explorerTreeProvider
-  );
+  // Register the views
+  const astView = vscode.window.createTreeView("jxscoutAstView", {
+    treeDataProvider: analysisTreeProvider,
+    showCollapseAll: true,
+  });
+
+  const fileView = vscode.window.createTreeView("jxscoutFileView", {
+    treeDataProvider: explorerTreeProvider,
+    showCollapseAll: true,
+  });
+
+  // Update view titles based on scope
+  function updateViewTitles(scope: string) {
+    astView.title = `AST Analysis (${scope})`;
+    fileView.title = `File Explorer (${scope})`;
+  }
+
+  // Initial titles
+  updateViewTitles("Project");
 
   let disposable = vscode.commands.registerCommand(
     "jxscout.toggleScope",
@@ -32,6 +43,7 @@ export function activate(context: vscode.ExtensionContext) {
       statusBarItem.text = `$(list-tree) ${
         newScope === "project" ? "Project" : "File"
       } Scope`;
+      updateViewTitles(newScope.charAt(0).toUpperCase() + newScope.slice(1));
       analysisTreeProvider.refresh();
       explorerTreeProvider.refresh();
     }
