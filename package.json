@@ -1,7 +1,7 @@
 {
   "name": "jxscout-vscode",
   "displayName": "jxscout-vscode",
-  "description": "jxscout extension for VSCode to help security researchers analyze JS files.",
+  "description": "jxscout extension for VSCode",
   "version": "0.0.1",
   "engines": {
     "vscode": "^1.99.0"
@@ -17,12 +17,12 @@
         "jxscout.serverHost": {
           "type": "string",
           "default": "localhost",
-          "description": "Hostname of the jxscout WebSocket server"
+          "description": "Hostname where jxscout is running"
         },
         "jxscout.serverPort": {
           "type": "number",
           "default": 3333,
-          "description": "Port of the jxscout WebSocket server"
+          "description": "Port where jxscout is running"
         }
       }
     }
