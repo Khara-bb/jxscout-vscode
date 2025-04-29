@@ -10,7 +10,58 @@
     "Other"
   ],
   "main": "./dist/extension.js",
+  "enabledApiProposals": ["contribViewContainerTitle"],
   "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "jxscout-sidebar",
+          "title": "jxscout",
+          "icon": "resources/jxscout.svg"
+        }
+      ]
+    },
+    "views": {
+      "jxscout-sidebar": [
+        {
+          "type": "tree",
+          "id": "jxscoutAstView",
+          "name": "AST Analysis",
+          "icon": "symbol-structure"
+        },
+        {
+          "type": "tree",
+          "id": "jxscoutFileView",
+          "name": "File Explorer",
+          "icon": "files"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "jxscout.toggleScope",
+        "title": "Toggle Project/File Scope",
+        "icon": "$(list-tree)"
+      }
+    ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "jxscout.toggleScope",
+          "when": "view == jxscoutAstView",
+          "group": "navigation",
+          "alt": "Toggle Project/File Scope"
+        },
+        {
+          "command": "jxscout.toggleScope",
+          "when": "view == jxscoutFileView",
+          "group": "navigation",
+          "alt": "Toggle Project/File Scope"
+        }
+      ],
+      "viewContainer/title": [
+      ]
+    },
     "configuration": {
       "title": "jxscout",
       "properties": {
