@@ -2,20 +2,54 @@ import * as vscode from "vscode";
 import WebSocket from "ws";
 import { v4 as uuidv4 } from "uuid";
 
+enum MessageType {
+  GetAnalysisRequest = "getAnalysisRequest",
+  GetAnalysisResponse = "getAnalysisResponse",
+}
+
 export interface Position {
   column: number;
   line: number;
 }
 
-export interface Finding {
+export interface AnalyzerMatch {
+  analyzerName: string;
+  value: string;
   start: Position;
   end: Position;
-  value: string;
+}
+
+export interface TreeNode<T> {
+  label: string;
+  icon: string;
+  value: T;
+}
+
+export interface Paths {
+  all?: TreeNode<AnalyzerMatch[]>;
+  apiPaths?: TreeNode<AnalyzerMatch[]>;
+  queryParams?: TreeNode<AnalyzerMatch[]>;
+}
+
+export enum ASTAnalyzerTreeNodeType {
+  Navigation = "navigation",
+  Match = "match",
+}
+
+export interface ASTAnalyzerTreeNode {
+  id?: string;
+  type?: ASTAnalyzerTreeNodeType;
+  data?: any; // This will be typed based on the specific analyzer
+  label?: string;
+  description?: string;
+  iconPath?: string;
+  tooltip?: string;
+  children?: ASTAnalyzerTreeNode[];
 }
 
 export interface AnalysisResult {
   filePath: string;
-  results: Record<string, Finding[]>;
+  results: ASTAnalyzerTreeNode;
 }
 
 export class WebSocketClient {
@@ -87,7 +121,7 @@ export class WebSocketClient {
     const { type, id, payload } = message;
 
     switch (type) {
-      case "analysis":
+      case MessageType.GetAnalysisResponse:
         const callback = this.messageCallbacks.get(id);
         if (callback) {
           callback(payload);
@@ -96,9 +130,6 @@ export class WebSocketClient {
         break;
       case "error":
         console.error("Server error:", payload.message);
-        if (payload.message.includes("asset not found")) {
-          return; // ignore asset not found errors
-        }
         vscode.window.showErrorMessage(
           `jxscout analysis error: ${payload.message}`
         );
@@ -117,28 +148,7 @@ export class WebSocketClient {
 
       const messageId = uuidv4();
       const message = {
-        type: "getAnalysis",
-        id: messageId,
-        payload: {
-          filePath: filePath,
-        },
-      };
-
-      this.messageCallbacks.set(messageId, resolve);
-      this.ws.send(JSON.stringify(message));
-    });
-  }
-
-  async forceReanalysis(filePath: string): Promise<AnalysisResult> {
-    return new Promise((resolve, reject) => {
-      if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
-        reject(new Error("WebSocket is not connected"));
-        return;
-      }
-
-      const messageId = uuidv4();
-      const message = {
-        type: "forceReanalysis",
+        type: MessageType.GetAnalysisRequest,
         id: messageId,
         payload: {
           filePath: filePath,
