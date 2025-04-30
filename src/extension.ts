@@ -61,7 +61,7 @@ export function activate(context: vscode.ExtensionContext) {
   }
 
   // Initial titles
-  updateViewTitles("Project");
+  updateViewTitles("File");
 
   async function updateASTAnalysis(editor: vscode.TextEditor | undefined) {
     if (!editor) {

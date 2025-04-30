@@ -32,7 +32,7 @@ export class FileExplorerTreeProvider
     FileExplorerTreeItem | undefined | null | void
   > = this._onDidChangeTreeData.event;
 
-  private _scope: ViewScope = "project";
+  private _scope: ViewScope = "file";
   private _workspaceRoot?: string;
 
   constructor(workspaceRoot?: string) {
