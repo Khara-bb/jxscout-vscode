@@ -5,6 +5,8 @@ import { v4 as uuidv4 } from "uuid";
 enum MessageType {
   GetAnalysisRequest = "getAnalysisRequest",
   GetAnalysisResponse = "getAnalysisResponse",
+
+  Error = "error",
 }
 
 export interface Position {
@@ -47,15 +49,31 @@ export interface ASTAnalyzerTreeNode {
   children?: ASTAnalyzerTreeNode[];
 }
 
+export type WebsocketError = {
+  message: string;
+};
+
 export interface AnalysisResult {
   filePath: string;
   results: ASTAnalyzerTreeNode;
 }
 
+export type WebsocketMessage = {
+  type: MessageType;
+  id: string;
+  payload: any;
+  error?: WebsocketError;
+};
+
 export class WebSocketClient {
   private ws: WebSocket | null = null;
-  private messageCallbacks: Map<string, (result: AnalysisResult) => void> =
-    new Map();
+  private messageCallbacks: Map<
+    string,
+    {
+      resolve: (result: AnalysisResult) => void;
+      reject: (error: Error) => void;
+    }
+  > = new Map();
   private reconnectTimeout: NodeJS.Timeout | null = null;
   private readonly reconnectDelay = 5000; // 5 seconds
   private serverUrl: string;
@@ -117,22 +135,24 @@ export class WebSocketClient {
     }, this.reconnectDelay);
   }
 
-  private handleMessage(message: any) {
-    const { type, id, payload } = message;
+  private handleMessage(message: WebsocketMessage) {
+    const { type, id, payload, error } = message;
 
     switch (type) {
       case MessageType.GetAnalysisResponse:
         const callback = this.messageCallbacks.get(id);
         if (callback) {
-          callback(payload);
+          if (error) {
+            callback.reject(new Error(error.message));
+          } else {
+            callback.resolve(payload);
+          }
           this.messageCallbacks.delete(id);
         }
         break;
-      case "error":
-        console.error("Server error:", payload.message);
-        vscode.window.showErrorMessage(
-          `jxscout analysis error: ${payload.message}`
-        );
+      case MessageType.Error:
+        console.error("Server error:", error?.message);
+        vscode.window.showErrorMessage(`jxscout error: ${error?.message}`);
         break;
       default:
         console.warn("Unknown message type:", type);
@@ -155,7 +175,7 @@ export class WebSocketClient {
         },
       };
 
-      this.messageCallbacks.set(messageId, resolve);
+      this.messageCallbacks.set(messageId, { resolve, reject });
       this.ws.send(JSON.stringify(message));
     });
   }

@@ -1,6 +1,7 @@
 import * as vscode from "vscode";
-import { JxscoutTreeProvider } from "./jxscout-tree-provider";
-import { WebSocketClient } from "./websocket-client";
+import { AstAnalysisTreeProvider } from "./ast-analysis-tree-provider";
+import { FileExplorerTreeProvider } from "./file-explorer-tree-provider";
+import { WebSocketClient, WebsocketError } from "./websocket-client";
 
 export function activate(context: vscode.ExtensionContext) {
   // Initialize WebSocket client
@@ -38,8 +39,9 @@ export function activate(context: vscode.ExtensionContext) {
       );
     });
 
-  const analysisTreeProvider = new JxscoutTreeProvider("analysis");
-  const explorerTreeProvider = new JxscoutTreeProvider("explorer");
+  const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
+  const analysisTreeProvider = new AstAnalysisTreeProvider();
+  const explorerTreeProvider = new FileExplorerTreeProvider(workspaceRoot);
 
   // Register the views
   const astView = vscode.window.createTreeView("jxscoutAstView", {
@@ -75,8 +77,15 @@ export function activate(context: vscode.ExtensionContext) {
 
     try {
       const analysis = await wsClient.getAnalysis(document.uri.fsPath);
+      console.log("AST analysis result:", JSON.stringify(analysis));
       analysisTreeProvider.setAnalysisData(analysis.results);
     } catch (error: any) {
+      if (error?.message?.includes("asset not found")) {
+        // it's expected that some assets are not tracked by jxscout,
+        // so silently ignore the error
+        return;
+      }
+
       vscode.window.showErrorMessage(
         `Failed to get AST analysis: ${error.message}`
       );
@@ -90,9 +99,6 @@ export function activate(context: vscode.ExtensionContext) {
       await updateASTAnalysis(editor);
     }
   );
-
-  // Initial analysis for currently active editor
-  // updateASTAnalysis();
 
   let disposable = vscode.commands.registerCommand(
     "jxscout.toggleScope",
