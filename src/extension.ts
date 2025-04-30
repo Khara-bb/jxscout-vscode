@@ -128,11 +128,11 @@ export function activate(context: vscode.ExtensionContext) {
 
       const startPosition = new vscode.Position(
         data.start.line - 1,
-        data.start.column - 1
+        data.start.column
       );
       const endPosition = new vscode.Position(
         data.end.line - 1,
-        data.end.column - 1
+        data.end.column
       );
 
       const range = new vscode.Range(startPosition, endPosition);
