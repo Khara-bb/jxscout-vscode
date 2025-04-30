@@ -118,12 +118,20 @@ export function activate(context: vscode.ExtensionContext) {
     }
   );
 
+  let currentDecorationType: vscode.TextEditorDecorationType | undefined;
+
   let navigateToMatchDisposable = vscode.commands.registerCommand(
     "jxscout.navigateToMatch",
     (data: any) => {
       const editor = vscode.window.activeTextEditor;
       if (!editor) {
         return;
+      }
+
+      // Dispose of any existing decoration
+      if (currentDecorationType) {
+        currentDecorationType.dispose();
+        currentDecorationType = undefined;
       }
 
       const startPosition = new vscode.Position(
@@ -139,19 +147,29 @@ export function activate(context: vscode.ExtensionContext) {
       editor.selection = new vscode.Selection(startPosition, endPosition);
       editor.revealRange(range, vscode.TextEditorRevealType.InCenter);
 
-      // Add a decoration to highlight the range
-      const decorationType = vscode.window.createTextEditorDecorationType({
+      // Create and store the new decoration
+      currentDecorationType = vscode.window.createTextEditorDecorationType({
         backgroundColor: new vscode.ThemeColor("editor.selectionBackground"),
         isWholeLine: false,
       });
 
-      editor.setDecorations(decorationType, [range]);
+      editor.setDecorations(currentDecorationType, [range]);
     }
   );
+
+  // Add a listener for selection changes
+  const selectionChangeDisposable =
+    vscode.window.onDidChangeTextEditorSelection(() => {
+      if (currentDecorationType) {
+        currentDecorationType.dispose();
+        currentDecorationType = undefined;
+      }
+    });
 
   context.subscriptions.push(
     disposable,
     navigateToMatchDisposable,
+    selectionChangeDisposable,
     editorChangeDisposable,
     astView,
     fileView,
