@@ -1,8 +1,7 @@
 import * as vscode from "vscode";
 import * as path from "path";
 import * as fs from "fs";
-
-type ViewScope = "project" | "file";
+import { ViewScope } from "../types";
 
 export class FileExplorerTreeItem extends vscode.TreeItem {
   constructor(

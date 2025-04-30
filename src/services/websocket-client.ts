@@ -1,17 +1,13 @@
 import * as vscode from "vscode";
 import WebSocket from "ws";
 import { v4 as uuidv4 } from "uuid";
+import { AnalysisResult, Position } from "../types";
 
 enum MessageType {
   GetAnalysisRequest = "getAnalysisRequest",
   GetAnalysisResponse = "getAnalysisResponse",
 
   Error = "error",
-}
-
-export interface Position {
-  column: number;
-  line: number;
 }
 
 export interface AnalyzerMatch {
@@ -22,30 +18,9 @@ export interface AnalyzerMatch {
   end: Position;
 }
 
-export enum ASTAnalyzerTreeNodeType {
-  Navigation = "navigation",
-  Match = "match",
-}
-
-export interface ASTAnalyzerTreeNode {
-  id?: string;
-  type?: ASTAnalyzerTreeNodeType;
-  data?: any; // This will be typed based on the specific analyzer
-  label?: string;
-  description?: string;
-  iconName?: string;
-  tooltip?: string;
-  children?: ASTAnalyzerTreeNode[];
-}
-
 export type WebsocketError = {
   message: string;
 };
-
-export interface AnalysisResult {
-  filePath: string;
-  results: ASTAnalyzerTreeNode;
-}
 
 export type WebsocketMessage = {
   type: MessageType;

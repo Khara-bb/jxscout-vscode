@@ -1,11 +1,11 @@
 import * as vscode from "vscode";
 import {
   ASTAnalyzerTreeNode,
-  ASTAnalyzerTreeNodeType,
-} from "./websocket-client";
-
-type ViewScope = "project" | "file";
-type SortMode = "alphabetical" | "occurrence";
+  TreeItemOptions,
+  TreeState,
+  ViewScope,
+  SortMode,
+} from "../types";
 
 export class AstAnalysisTreeItem extends vscode.TreeItem {
   public readonly node: ASTAnalyzerTreeNode;
@@ -17,14 +17,7 @@ export class AstAnalysisTreeItem extends vscode.TreeItem {
     node,
     description,
     tooltip,
-  }: {
-    label: string;
-    collapsibleState: vscode.TreeItemCollapsibleState;
-    iconName?: string;
-    node: ASTAnalyzerTreeNode;
-    description?: string;
-    tooltip?: string;
-  }) {
+  }: TreeItemOptions) {
     super(label, collapsibleState);
     this.description = description || "";
     this.tooltip = tooltip;
@@ -45,8 +38,6 @@ export class AstAnalysisTreeItem extends vscode.TreeItem {
   }
 }
 
-type State = "loading" | "asset-not-found" | "success" | "empty";
-
 export class AstAnalysisTreeProvider
   implements vscode.TreeDataProvider<AstAnalysisTreeItem>
 {
@@ -59,7 +50,7 @@ export class AstAnalysisTreeProvider
 
   private _scope: ViewScope = "file";
   private _analysisData?: ASTAnalyzerTreeNode;
-  private _state: State = "loading";
+  private _state: TreeState = "loading";
   private _sortMode: SortMode = "occurrence";
 
   getScope(): ViewScope {
@@ -80,7 +71,7 @@ export class AstAnalysisTreeProvider
     this.refresh();
   }
 
-  setState(state: State) {
+  setState(state: TreeState) {
     this._state = state;
     if (state !== "success") {
       this._analysisData = undefined;
@@ -113,7 +104,7 @@ export class AstAnalysisTreeProvider
           collapsibleState: vscode.TreeItemCollapsibleState.None,
           iconName: "loading~spin",
           node: {
-            type: ASTAnalyzerTreeNodeType.Navigation,
+            type: "navigation",
             label: "Loading analysis...",
           },
         }),
@@ -127,7 +118,7 @@ export class AstAnalysisTreeProvider
           collapsibleState: vscode.TreeItemCollapsibleState.None,
           iconName: "info",
           node: {
-            type: ASTAnalyzerTreeNodeType.Navigation,
+            type: "navigation",
             label: "This file is not tracked by jxscout",
           },
         }),
@@ -141,7 +132,7 @@ export class AstAnalysisTreeProvider
           collapsibleState: vscode.TreeItemCollapsibleState.None,
           iconName: "info",
           node: {
-            type: ASTAnalyzerTreeNodeType.Navigation,
+            type: "navigation",
             label: "No AST Analysis matches found",
           },
         }),

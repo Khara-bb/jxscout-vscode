@@ -1,10 +1,7 @@
 import * as vscode from "vscode";
-import {
-  AstAnalysisTreeProvider,
-  AstAnalysisTreeItem,
-} from "./ast-analysis-tree-provider";
-import { FileExplorerTreeProvider } from "./file-explorer-tree-provider";
-import { WebSocketClient, WebsocketError } from "./websocket-client";
+import { WebSocketClient } from "./services/websocket-client";
+import { createViews } from "./views";
+import { registerCommands } from "./commands";
 
 export function activate(context: vscode.ExtensionContext) {
   // Initialize WebSocket client
@@ -13,6 +10,7 @@ export function activate(context: vscode.ExtensionContext) {
   const port = config.get<number>("serverPort") || 3333;
   const wsClient = new WebSocketClient(`ws://${host}:${port}/ws`);
 
+  // Create status bar items
   const statusBarItem = vscode.window.createStatusBarItem(
     vscode.StatusBarAlignment.Left
   );
@@ -28,6 +26,7 @@ export function activate(context: vscode.ExtensionContext) {
   connectionStatusBarItem.tooltip = "Connecting to jxscout server...";
   connectionStatusBarItem.show();
 
+  // Connect to WebSocket server
   wsClient
     .connect()
     .then(() => {
@@ -42,183 +41,23 @@ export function activate(context: vscode.ExtensionContext) {
       );
     });
 
+  // Create views and get providers
   const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
-  const analysisTreeProvider = new AstAnalysisTreeProvider();
-  const explorerTreeProvider = new FileExplorerTreeProvider(workspaceRoot);
+  const { astView, fileView, analysisTreeProvider, explorerTreeProvider } =
+    createViews(context, workspaceRoot, wsClient);
 
-  // Register the views
-  const astView = vscode.window.createTreeView("jxscoutAstView", {
-    treeDataProvider: analysisTreeProvider,
-    showCollapseAll: true,
-    canSelectMany: true,
-  });
-
-  const fileView = vscode.window.createTreeView("jxscoutFileView", {
-    treeDataProvider: explorerTreeProvider,
-    showCollapseAll: true,
-  });
-
-  // Update view titles based on scope
-  function updateViewTitles(scope: string) {
-    astView.title = `AST Analysis (${scope})`;
-    fileView.title = `File Explorer (${scope})`;
-  }
-
-  // Initial titles
-  updateViewTitles("File");
-
-  async function updateASTAnalysis(editor: vscode.TextEditor | undefined) {
-    if (!editor) {
-      analysisTreeProvider.setState("empty");
-      return;
-    }
-
-    const document = editor.document;
-    if (!document) {
-      analysisTreeProvider.setState("empty");
-      return;
-    }
-
-    analysisTreeProvider.setState("loading");
-
-    try {
-      const analysis = await wsClient.getAnalysis(document.uri.fsPath);
-      analysisTreeProvider.setAnalysisData(analysis.results);
-      analysisTreeProvider.setState("success");
-    } catch (error: any) {
-      if (error?.message?.includes("asset not found")) {
-        // it's expected that some assets are not tracked by jxscout,
-        // so show empty state
-        analysisTreeProvider.setState("asset-not-found");
-      } else {
-        vscode.window.showErrorMessage(
-          `Failed to get AST analysis: ${error.message}`
-        );
-        analysisTreeProvider.setState("empty");
-      }
-    }
-  }
-
-  // Register active editor change handler
-  const editorChangeDisposable = vscode.window.onDidChangeActiveTextEditor(
-    async (editor) => {
-      await updateASTAnalysis(editor);
-    }
-  );
-
-  let disposable = vscode.commands.registerCommand(
-    "jxscout.toggleScope",
-    () => {
-      const newScope =
-        analysisTreeProvider.getScope() === "project" ? "file" : "project";
-      analysisTreeProvider.setScope(newScope);
-      explorerTreeProvider.setScope(newScope);
-      statusBarItem.text = `$(list-tree) ${
-        newScope === "project" ? "Project" : "File"
-      } Scope`;
-      updateViewTitles(newScope.charAt(0).toUpperCase() + newScope.slice(1));
-      analysisTreeProvider.refresh();
-      explorerTreeProvider.refresh();
-    }
-  );
-
-  let toggleSortModeDisposable = vscode.commands.registerCommand(
-    "jxscout.toggleSortMode",
-    () => {
-      const newSortMode =
-        analysisTreeProvider.getSortMode() === "alphabetical"
-          ? "occurrence"
-          : "alphabetical";
-      analysisTreeProvider.setSortMode(newSortMode);
-      astView.title = `AST Analysis (${analysisTreeProvider.getScope()}) - ${
-        newSortMode === "alphabetical" ? "A-Z" : "By Occurrence"
-      }`;
-    }
-  );
-
-  let currentDecorationType: vscode.TextEditorDecorationType | undefined;
-
-  let navigateToMatchDisposable = vscode.commands.registerCommand(
-    "jxscout.navigateToMatch",
-    (data: any) => {
-      const editor = vscode.window.activeTextEditor;
-      if (!editor) {
-        return;
-      }
-
-      // Dispose of any existing decoration
-      if (currentDecorationType) {
-        currentDecorationType.dispose();
-        currentDecorationType = undefined;
-      }
-
-      const startPosition = new vscode.Position(
-        data.start.line - 1,
-        data.start.column
-      );
-      const endPosition = new vscode.Position(
-        data.end.line - 1,
-        data.end.column
-      );
-
-      const range = new vscode.Range(startPosition, endPosition);
-      editor.selection = new vscode.Selection(startPosition, endPosition);
-      editor.revealRange(range, vscode.TextEditorRevealType.InCenter);
-
-      // Create and store the new decoration
-      currentDecorationType = vscode.window.createTextEditorDecorationType({
-        backgroundColor: new vscode.ThemeColor("editor.selectionBackground"),
-        isWholeLine: false,
-      });
-
-      editor.setDecorations(currentDecorationType, [range]);
-    }
-  );
-
-  // Add a listener for selection changes
-  const selectionChangeDisposable =
-    vscode.window.onDidChangeTextEditorSelection(() => {
-      if (currentDecorationType) {
-        currentDecorationType.dispose();
-        currentDecorationType = undefined;
-      }
-    });
-
-  // Add command for copying values
-  let copyValuesDisposable = vscode.commands.registerCommand(
-    "jxscout.copyValues",
-    async () => {
-      const selectedItems = astView.selection;
-      if (!selectedItems || selectedItems.length === 0) {
-        return;
-      }
-
-      const values = selectedItems
-        .filter((item) => item.node.type === "match")
-        .map((item) => item.node.data.value)
-        .join("\n");
-
-      if (values) {
-        await vscode.env.clipboard.writeText(values);
-        vscode.window.showInformationMessage(
-          `Copied ${selectedItems.length} values to clipboard`
-        );
-      }
-    }
-  );
-
-  context.subscriptions.push(
-    disposable,
-    toggleSortModeDisposable,
-    navigateToMatchDisposable,
-    selectionChangeDisposable,
-    editorChangeDisposable,
-    copyValuesDisposable,
-    astView,
-    fileView,
+  // Register commands
+  registerCommands(
+    context,
+    analysisTreeProvider,
+    explorerTreeProvider,
     statusBarItem,
-    connectionStatusBarItem
+    astView,
+    fileView
   );
+
+  // Add status bar items to subscriptions
+  context.subscriptions.push(statusBarItem, connectionStatusBarItem);
 
   // Clean up WebSocket connection on deactivation
   context.subscriptions.push({
