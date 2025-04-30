@@ -35,6 +35,7 @@ export class AstAnalysisTreeItem extends vscode.TreeItem {
         title: "Navigate to match",
         arguments: [node.data],
       };
+      this.contextValue = "match";
     }
 
     if (iconName) {

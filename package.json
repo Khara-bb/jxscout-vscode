@@ -47,6 +47,11 @@
         "command": "jxscout.navigateToMatch",
         "title": "Navigate to Match",
         "icon": "$(arrow-right)"
+      },
+      {
+        "command": "jxscout.copyValues",
+        "title": "Copy Values",
+        "icon": "$(copy)"
       }
     ],
     "menus": {
@@ -60,6 +65,13 @@
           "command": "jxscout.toggleScope",
           "when": "view == jxscoutFileView",
           "group": "navigation"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "jxscout.copyValues",
+          "when": "view == jxscoutAstView && viewItem =~ /match/",
+          "group": "1_modification"
         }
       ]
     },

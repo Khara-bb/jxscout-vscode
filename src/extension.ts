@@ -1,5 +1,8 @@
 import * as vscode from "vscode";
-import { AstAnalysisTreeProvider } from "./ast-analysis-tree-provider";
+import {
+  AstAnalysisTreeProvider,
+  AstAnalysisTreeItem,
+} from "./ast-analysis-tree-provider";
 import { FileExplorerTreeProvider } from "./file-explorer-tree-provider";
 import { WebSocketClient, WebsocketError } from "./websocket-client";
 
@@ -47,6 +50,7 @@ export function activate(context: vscode.ExtensionContext) {
   const astView = vscode.window.createTreeView("jxscoutAstView", {
     treeDataProvider: analysisTreeProvider,
     showCollapseAll: true,
+    canSelectMany: true,
   });
 
   const fileView = vscode.window.createTreeView("jxscoutFileView", {
@@ -166,11 +170,35 @@ export function activate(context: vscode.ExtensionContext) {
       }
     });
 
+  // Add command for copying values
+  let copyValuesDisposable = vscode.commands.registerCommand(
+    "jxscout.copyValues",
+    async () => {
+      const selectedItems = astView.selection;
+      if (!selectedItems || selectedItems.length === 0) {
+        return;
+      }
+
+      const values = selectedItems
+        .filter((item) => item.node.type === "match")
+        .map((item) => item.node.data.value)
+        .join("\n");
+
+      if (values) {
+        await vscode.env.clipboard.writeText(values);
+        vscode.window.showInformationMessage(
+          `Copied ${selectedItems.length} values to clipboard`
+        );
+      }
+    }
+  );
+
   context.subscriptions.push(
     disposable,
     navigateToMatchDisposable,
     selectionChangeDisposable,
     editorChangeDisposable,
+    copyValuesDisposable,
     astView,
     fileView,
     statusBarItem,
