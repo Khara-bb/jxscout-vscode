@@ -1,35 +1,42 @@
 import * as vscode from "vscode";
-import { ASTAnalyzerTreeNode } from "./websocket-client";
+import {
+  ASTAnalyzerTreeNode,
+  ASTAnalyzerTreeNodeType,
+} from "./websocket-client";
 
 type ViewScope = "project" | "file";
 
 export class AstAnalysisTreeItem extends vscode.TreeItem {
-  public readonly children?: ASTAnalyzerTreeNode[];
-  public readonly data?: any;
+  public readonly node: ASTAnalyzerTreeNode;
 
   constructor({
     label,
     collapsibleState,
     iconName,
-    children,
-    data,
+    node,
     description,
     tooltip,
   }: {
     label: string;
     collapsibleState: vscode.TreeItemCollapsibleState;
-    contextValue: string;
     iconName?: string;
-    children?: ASTAnalyzerTreeNode[];
-    data?: any;
+    node: ASTAnalyzerTreeNode;
     description?: string;
     tooltip?: string;
   }) {
     super(label, collapsibleState);
     this.description = description || "";
     this.tooltip = tooltip;
-    this.children = children;
-    this.data = data;
+    this.node = node;
+
+    if (node.type === "match") {
+      this.command = {
+        command: "jxscout.navigateToMatch",
+        title: "Navigate to match",
+        arguments: [node.data],
+      };
+    }
+
     if (iconName) {
       this.iconPath = new vscode.ThemeIcon(iconName);
     }
@@ -92,8 +99,11 @@ export class AstAnalysisTreeProvider
         new AstAnalysisTreeItem({
           label: "Loading analysis...",
           collapsibleState: vscode.TreeItemCollapsibleState.None,
-          contextValue: "loading",
           iconName: "loading~spin",
+          node: {
+            type: ASTAnalyzerTreeNodeType.Navigation,
+            label: "Loading analysis...",
+          },
         }),
       ]);
     }
@@ -103,8 +113,11 @@ export class AstAnalysisTreeProvider
         new AstAnalysisTreeItem({
           label: "This file is not tracked by jxscout",
           collapsibleState: vscode.TreeItemCollapsibleState.None,
-          contextValue: "empty",
           iconName: "info",
+          node: {
+            type: ASTAnalyzerTreeNodeType.Navigation,
+            label: "This file is not tracked by jxscout",
+          },
         }),
       ]);
     }
@@ -114,8 +127,11 @@ export class AstAnalysisTreeProvider
         new AstAnalysisTreeItem({
           label: "No AST Analysis matches found",
           collapsibleState: vscode.TreeItemCollapsibleState.None,
-          contextValue: "empty",
           iconName: "info",
+          node: {
+            type: ASTAnalyzerTreeNodeType.Navigation,
+            label: "No AST Analysis matches found",
+          },
         }),
       ]);
     }
@@ -129,28 +145,24 @@ export class AstAnalysisTreeProvider
               collapsibleState: child.children?.length
                 ? vscode.TreeItemCollapsibleState.Expanded
                 : vscode.TreeItemCollapsibleState.None,
-              contextValue: child.type || "navigation",
               iconName: child.iconName,
-              children: child.children,
-              data: child.data,
+              node: child,
             })
         )
       );
     }
 
-    if (element.children) {
+    if (element.node.children) {
       return Promise.resolve(
-        element.children.map(
+        element.node.children.map(
           (child) =>
             new AstAnalysisTreeItem({
               label: child.label || "Node",
               collapsibleState: child.children?.length
                 ? vscode.TreeItemCollapsibleState.Expanded
                 : vscode.TreeItemCollapsibleState.None,
-              contextValue: child.type || "navigation",
               iconName: child.iconName,
-              children: child.children,
-              data: child.data,
+              node: child,
             })
         )
       );

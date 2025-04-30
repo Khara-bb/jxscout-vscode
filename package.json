@@ -42,6 +42,11 @@
         "command": "jxscout.toggleScope",
         "title": "Toggle Project/File Scope",
         "icon": "$(list-tree)"
+      },
+      {
+        "command": "jxscout.navigateToMatch",
+        "title": "Navigate to Match",
+        "icon": "$(arrow-right)"
       }
     ],
     "menus": {

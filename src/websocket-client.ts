@@ -15,22 +15,11 @@ export interface Position {
 }
 
 export interface AnalyzerMatch {
+  filePath: string;
   analyzerName: string;
   value: string;
   start: Position;
   end: Position;
-}
-
-export interface TreeNode<T> {
-  label: string;
-  icon: string;
-  value: T;
-}
-
-export interface Paths {
-  all?: TreeNode<AnalyzerMatch[]>;
-  apiPaths?: TreeNode<AnalyzerMatch[]>;
-  queryParams?: TreeNode<AnalyzerMatch[]>;
 }
 
 export enum ASTAnalyzerTreeNodeType {

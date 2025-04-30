@@ -118,8 +118,40 @@ export function activate(context: vscode.ExtensionContext) {
     }
   );
 
+  let navigateToMatchDisposable = vscode.commands.registerCommand(
+    "jxscout.navigateToMatch",
+    (data: any) => {
+      const editor = vscode.window.activeTextEditor;
+      if (!editor) {
+        return;
+      }
+
+      const startPosition = new vscode.Position(
+        data.start.line - 1,
+        data.start.column - 1
+      );
+      const endPosition = new vscode.Position(
+        data.end.line - 1,
+        data.end.column - 1
+      );
+
+      const range = new vscode.Range(startPosition, endPosition);
+      editor.selection = new vscode.Selection(startPosition, endPosition);
+      editor.revealRange(range, vscode.TextEditorRevealType.InCenter);
+
+      // Add a decoration to highlight the range
+      const decorationType = vscode.window.createTextEditorDecorationType({
+        backgroundColor: new vscode.ThemeColor("editor.selectionBackground"),
+        isWholeLine: false,
+      });
+
+      editor.setDecorations(decorationType, [range]);
+    }
+  );
+
   context.subscriptions.push(
     disposable,
+    navigateToMatchDisposable,
     editorChangeDisposable,
     astView,
     fileView,
