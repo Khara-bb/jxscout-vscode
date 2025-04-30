@@ -65,43 +65,33 @@ export function activate(context: vscode.ExtensionContext) {
 
   async function updateASTAnalysis(editor: vscode.TextEditor | undefined) {
     if (!editor) {
-      analysisTreeProvider.setAnalysisData(undefined);
-      analysisTreeProvider.setLoading(false);
-      analysisTreeProvider.setEmpty(false);
+      analysisTreeProvider.setState("empty");
       return;
     }
 
     const document = editor.document;
     if (!document) {
-      analysisTreeProvider.setAnalysisData(undefined);
-      analysisTreeProvider.setLoading(false);
-      analysisTreeProvider.setEmpty(false);
+      analysisTreeProvider.setState("empty");
       return;
     }
 
-    analysisTreeProvider.setLoading(true);
-    analysisTreeProvider.setEmpty(false);
+    analysisTreeProvider.setState("loading");
 
     try {
       const analysis = await wsClient.getAnalysis(document.uri.fsPath);
       analysisTreeProvider.setAnalysisData(analysis.results);
-      analysisTreeProvider.setEmpty(
-        !analysis.results || !analysis.results.children?.length
-      );
+      analysisTreeProvider.setState("success");
     } catch (error: any) {
       if (error?.message?.includes("asset not found")) {
         // it's expected that some assets are not tracked by jxscout,
         // so show empty state
-        analysisTreeProvider.setEmpty(true);
-        analysisTreeProvider.setAnalysisData(undefined);
+        analysisTreeProvider.setState("asset-not-found");
       } else {
         vscode.window.showErrorMessage(
           `Failed to get AST analysis: ${error.message}`
         );
-        analysisTreeProvider.setAnalysisData(undefined);
+        analysisTreeProvider.setState("empty");
       }
-    } finally {
-      analysisTreeProvider.setLoading(false);
     }
   }
 

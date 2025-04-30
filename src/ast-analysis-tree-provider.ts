@@ -8,7 +8,9 @@ export class AstAnalysisTreeItem extends vscode.TreeItem {
     public readonly label: string,
     public readonly collapsibleState: vscode.TreeItemCollapsibleState,
     public readonly contextValue: string,
-    public readonly iconName?: string
+    public readonly iconName?: string,
+    public readonly children?: ASTAnalyzerTreeNode[],
+    public readonly data?: any
   ) {
     super(label, collapsibleState);
     if (iconName) {
@@ -16,6 +18,8 @@ export class AstAnalysisTreeItem extends vscode.TreeItem {
     }
   }
 }
+
+type State = "loading" | "asset-not-found" | "success" | "empty";
 
 export class AstAnalysisTreeProvider
   implements vscode.TreeDataProvider<AstAnalysisTreeItem>
@@ -29,8 +33,7 @@ export class AstAnalysisTreeProvider
 
   private _scope: ViewScope = "file";
   private _analysisData?: ASTAnalyzerTreeNode;
-  private _isLoading: boolean = false;
-  private _isEmpty: boolean = false;
+  private _state: State = "loading";
 
   getScope(): ViewScope {
     return this._scope;
@@ -41,13 +44,11 @@ export class AstAnalysisTreeProvider
     this.refresh();
   }
 
-  setLoading(isLoading: boolean) {
-    this._isLoading = isLoading;
-    this.refresh();
-  }
-
-  setEmpty(isEmpty: boolean) {
-    this._isEmpty = isEmpty;
+  setState(state: State) {
+    this._state = state;
+    if (state !== "success") {
+      this._analysisData = undefined;
+    }
     this.refresh();
   }
 
@@ -65,7 +66,11 @@ export class AstAnalysisTreeProvider
   }
 
   getChildren(element?: AstAnalysisTreeItem): Thenable<AstAnalysisTreeItem[]> {
-    if (this._isLoading) {
+    if (this._state === "empty") {
+      return Promise.resolve([]);
+    }
+
+    if (this._state === "loading") {
       return Promise.resolve([
         new AstAnalysisTreeItem(
           "Loading analysis...",
@@ -76,10 +81,10 @@ export class AstAnalysisTreeProvider
       ]);
     }
 
-    if (this._isEmpty) {
+    if (this._state === "asset-not-found") {
       return Promise.resolve([
         new AstAnalysisTreeItem(
-          "No analysis available for this file",
+          "This file is not tracked by jxscout",
           vscode.TreeItemCollapsibleState.None,
           "empty",
           "info"
@@ -87,35 +92,62 @@ export class AstAnalysisTreeProvider
       ]);
     }
 
-    if (!this._analysisData) {
-      return Promise.resolve([]);
-    }
-
-    if (!element) {
+    if (!this._analysisData?.children?.length) {
       return Promise.resolve([
         new AstAnalysisTreeItem(
-          this._analysisData.label || "AST Analysis",
-          vscode.TreeItemCollapsibleState.Expanded,
-          "ast-root",
-          "symbol-namespace"
+          "No AST Analysis matches found",
+          vscode.TreeItemCollapsibleState.None,
+          "empty",
+          "info"
         ),
       ]);
     }
 
-    if (element.contextValue === "ast-root" && this._analysisData.children) {
+    if (!element) {
       return Promise.resolve(
         this._analysisData.children.map(
           (child) =>
             new AstAnalysisTreeItem(
-              child.label || "Node",
+              child.label || "Root",
               child.children?.length
-                ? vscode.TreeItemCollapsibleState.Collapsed
+                ? vscode.TreeItemCollapsibleState.Expanded
                 : vscode.TreeItemCollapsibleState.None,
-              "ast-node",
-              child.iconPath || "symbol-method"
+              child.type || "navigation",
+              child.type === "match" ? "symbol-method" : "symbol-namespace",
+              child.children,
+              child.data
             )
         )
       );
+    }
+
+    if (element.contextValue === "navigation" && element.children) {
+      return Promise.resolve(
+        element.children.map(
+          (child) =>
+            new AstAnalysisTreeItem(
+              child.label || "Node",
+              child.children?.length
+                ? vscode.TreeItemCollapsibleState.Expanded
+                : vscode.TreeItemCollapsibleState.None,
+              child.type || "navigation",
+              child.type === "match" ? "symbol-method" : "symbol-namespace",
+              child.children,
+              child.data
+            )
+        )
+      );
+    }
+
+    if (element.contextValue === "match" && element.data) {
+      return Promise.resolve([
+        new AstAnalysisTreeItem(
+          `Value: ${element.data.value}`,
+          vscode.TreeItemCollapsibleState.None,
+          "match-value",
+          "symbol-string"
+        ),
+      ]);
     }
 
     return Promise.resolve([]);
