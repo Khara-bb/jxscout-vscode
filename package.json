@@ -49,17 +49,13 @@
         {
           "command": "jxscout.toggleScope",
           "when": "view == jxscoutAstView",
-          "group": "navigation",
-          "alt": "Toggle Project/File Scope"
+          "group": "navigation"
         },
         {
           "command": "jxscout.toggleScope",
           "when": "view == jxscoutFileView",
-          "group": "navigation",
-          "alt": "Toggle Project/File Scope"
+          "group": "navigation"
         }
-      ],
-      "viewContainer/title": [
       ]
     },
     "configuration": {

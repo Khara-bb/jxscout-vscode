@@ -1,4 +1,5 @@
 import * as vscode from "vscode";
+import { ASTAnalyzerTreeNode } from "./websocket-client";
 
 type ViewMode = "explorer" | "analysis";
 type ViewScope = "project" | "file";
@@ -29,6 +30,7 @@ export class JxscoutTreeProvider
 
   private _scope: ViewScope = "project";
   private _mode: ViewMode = "explorer";
+  private _analysisData?: ASTAnalyzerTreeNode;
 
   constructor(viewMode: ViewMode = "explorer") {
     this._mode = viewMode;
@@ -45,6 +47,11 @@ export class JxscoutTreeProvider
 
   setMode(mode: ViewMode) {
     this._mode = mode;
+    this.refresh();
+  }
+
+  setAnalysisData(data: ASTAnalyzerTreeNode | undefined) {
+    this._analysisData = data;
     this.refresh();
   }
 
@@ -118,11 +125,14 @@ export class JxscoutTreeProvider
   private getAstAnalysisChildren(
     element?: JxscoutTreeItem
   ): Thenable<JxscoutTreeItem[]> {
+    if (!this._analysisData) {
+      return Promise.resolve([]);
+    }
+
     if (!element) {
-      const scope = this._scope === "project" ? "(Project)" : "(Current File)";
       return Promise.resolve([
         new JxscoutTreeItem(
-          `Program ${scope}`,
+          this._analysisData.label || "AST Analysis",
           vscode.TreeItemCollapsibleState.Expanded,
           "ast-root",
           "symbol-namespace"
@@ -130,38 +140,20 @@ export class JxscoutTreeProvider
       ]);
     }
 
-    if (element.contextValue === "ast-root") {
-      return Promise.resolve([
-        new JxscoutTreeItem(
-          "Function Declaration",
-          vscode.TreeItemCollapsibleState.Collapsed,
-          "ast-node",
-          "symbol-method"
-        ),
-        new JxscoutTreeItem(
-          "Variable Declaration",
-          vscode.TreeItemCollapsibleState.Collapsed,
-          "ast-node",
-          "symbol-variable"
-        ),
-      ]);
-    }
-
-    if (element.contextValue === "ast-node") {
-      return Promise.resolve([
-        new JxscoutTreeItem(
-          "Parameters",
-          vscode.TreeItemCollapsibleState.Collapsed,
-          "ast-detail",
-          "symbol-parameter"
-        ),
-        new JxscoutTreeItem(
-          "Body",
-          vscode.TreeItemCollapsibleState.Collapsed,
-          "ast-detail",
-          "symbol-field"
-        ),
-      ]);
+    if (element.contextValue === "ast-root" && this._analysisData.children) {
+      return Promise.resolve(
+        this._analysisData.children.map(
+          (child) =>
+            new JxscoutTreeItem(
+              child.label || "Node",
+              child.children?.length
+                ? vscode.TreeItemCollapsibleState.Collapsed
+                : vscode.TreeItemCollapsibleState.None,
+              "ast-node",
+              child.iconPath || "symbol-method"
+            )
+        )
+      );
     }
 
     return Promise.resolve([]);

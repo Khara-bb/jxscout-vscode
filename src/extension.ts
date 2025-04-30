@@ -1,7 +1,14 @@
 import * as vscode from "vscode";
 import { JxscoutTreeProvider } from "./jxscout-tree-provider";
+import { WebSocketClient } from "./websocket-client";
 
 export function activate(context: vscode.ExtensionContext) {
+  // Initialize WebSocket client
+  const config = vscode.workspace.getConfiguration("jxscout");
+  const host = config.get<string>("serverHost") || "localhost";
+  const port = config.get<number>("serverPort") || 3333;
+  const wsClient = new WebSocketClient(`ws://${host}:${port}/ws`);
+
   const statusBarItem = vscode.window.createStatusBarItem(
     vscode.StatusBarAlignment.Left
   );
@@ -9,6 +16,27 @@ export function activate(context: vscode.ExtensionContext) {
   statusBarItem.tooltip = "Click to toggle between project and file scope";
   statusBarItem.command = "jxscout.toggleScope";
   statusBarItem.show();
+
+  const connectionStatusBarItem = vscode.window.createStatusBarItem(
+    vscode.StatusBarAlignment.Right
+  );
+  connectionStatusBarItem.text = "jxscout $(sync~spin)";
+  connectionStatusBarItem.tooltip = "Connecting to jxscout server...";
+  connectionStatusBarItem.show();
+
+  wsClient
+    .connect()
+    .then(() => {
+      connectionStatusBarItem.text = "jxscout $(check)";
+      connectionStatusBarItem.tooltip = "Connected to jxscout server";
+    })
+    .catch((error) => {
+      connectionStatusBarItem.text = "jxscout $(error)";
+      connectionStatusBarItem.tooltip = `Failed to connect: ${error.message}`;
+      vscode.window.showErrorMessage(
+        `Failed to connect to jxscout server: ${error.message}`
+      );
+    });
 
   const analysisTreeProvider = new JxscoutTreeProvider("analysis");
   const explorerTreeProvider = new JxscoutTreeProvider("explorer");
@@ -33,6 +61,39 @@ export function activate(context: vscode.ExtensionContext) {
   // Initial titles
   updateViewTitles("Project");
 
+  async function updateASTAnalysis(editor: vscode.TextEditor | undefined) {
+    if (!editor) {
+      analysisTreeProvider.setAnalysisData(undefined);
+      return;
+    }
+
+    const document = editor.document;
+    if (!document) {
+      analysisTreeProvider.setAnalysisData(undefined);
+      return;
+    }
+
+    try {
+      const analysis = await wsClient.getAnalysis(document.uri.fsPath);
+      analysisTreeProvider.setAnalysisData(analysis.results);
+    } catch (error: any) {
+      vscode.window.showErrorMessage(
+        `Failed to get AST analysis: ${error.message}`
+      );
+      analysisTreeProvider.setAnalysisData(undefined);
+    }
+  }
+
+  // Register active editor change handler
+  const editorChangeDisposable = vscode.window.onDidChangeActiveTextEditor(
+    async (editor) => {
+      await updateASTAnalysis(editor);
+    }
+  );
+
+  // Initial analysis for currently active editor
+  // updateASTAnalysis();
+
   let disposable = vscode.commands.registerCommand(
     "jxscout.toggleScope",
     () => {
@@ -49,7 +110,21 @@ export function activate(context: vscode.ExtensionContext) {
     }
   );
 
-  context.subscriptions.push(disposable);
+  context.subscriptions.push(
+    disposable,
+    editorChangeDisposable,
+    astView,
+    fileView,
+    statusBarItem,
+    connectionStatusBarItem
+  );
+
+  // Clean up WebSocket connection on deactivation
+  context.subscriptions.push({
+    dispose: () => {
+      wsClient.disconnect();
+    },
+  });
 }
 
 export function deactivate() {}
