@@ -7,7 +7,6 @@ export function registerCommands(
   context: vscode.ExtensionContext,
   analysisTreeProvider: AstAnalysisTreeProvider,
   explorerTreeProvider: FileExplorerTreeProvider,
-  statusBarItem: vscode.StatusBarItem,
   astView: vscode.TreeView<any>,
   fileView: vscode.TreeView<any>
 ) {
@@ -17,11 +16,9 @@ export function registerCommands(
     () => {
       const newScope =
         analysisTreeProvider.getScope() === "project" ? "file" : "project";
+
       analysisTreeProvider.setScope(newScope);
       explorerTreeProvider.setScope(newScope);
-      statusBarItem.text = `$(list-tree) ${
-        newScope === "project" ? "Project" : "File"
-      } Scope`;
       updateViewTitles(newScope);
       analysisTreeProvider.refresh();
       explorerTreeProvider.refresh();

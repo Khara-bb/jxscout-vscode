@@ -10,15 +10,6 @@ export function activate(context: vscode.ExtensionContext) {
   const port = config.get<number>("serverPort") || 3333;
   const wsClient = new WebSocketClient(`ws://${host}:${port}/ws`);
 
-  // Create status bar items
-  const statusBarItem = vscode.window.createStatusBarItem(
-    vscode.StatusBarAlignment.Left
-  );
-  statusBarItem.text = "$(list-tree) Project Scope";
-  statusBarItem.tooltip = "Click to toggle between project and file scope";
-  statusBarItem.command = "jxscout.toggleScope";
-  statusBarItem.show();
-
   const connectionStatusBarItem = vscode.window.createStatusBarItem(
     vscode.StatusBarAlignment.Right
   );
@@ -51,13 +42,12 @@ export function activate(context: vscode.ExtensionContext) {
     context,
     analysisTreeProvider,
     explorerTreeProvider,
-    statusBarItem,
     astView,
     fileView
   );
 
   // Add status bar items to subscriptions
-  context.subscriptions.push(statusBarItem, connectionStatusBarItem);
+  context.subscriptions.push(connectionStatusBarItem);
 
   // Clean up WebSocket connection on deactivation
   context.subscriptions.push({
