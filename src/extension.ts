@@ -77,7 +77,6 @@ export function activate(context: vscode.ExtensionContext) {
 
     try {
       const analysis = await wsClient.getAnalysis(document.uri.fsPath);
-      console.log("AST analysis result:", JSON.stringify(analysis));
       analysisTreeProvider.setAnalysisData(analysis.results);
     } catch (error: any) {
       if (error?.message?.includes("asset not found")) {
