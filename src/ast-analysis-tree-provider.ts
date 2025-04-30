@@ -5,6 +5,7 @@ import {
 } from "./websocket-client";
 
 type ViewScope = "project" | "file";
+type SortMode = "alphabetical" | "occurrence";
 
 export class AstAnalysisTreeItem extends vscode.TreeItem {
   public readonly node: ASTAnalyzerTreeNode;
@@ -59,9 +60,19 @@ export class AstAnalysisTreeProvider
   private _scope: ViewScope = "file";
   private _analysisData?: ASTAnalyzerTreeNode;
   private _state: State = "loading";
+  private _sortMode: SortMode = "occurrence";
 
   getScope(): ViewScope {
     return this._scope;
+  }
+
+  getSortMode(): SortMode {
+    return this._sortMode;
+  }
+
+  setSortMode(mode: SortMode) {
+    this._sortMode = mode;
+    this.refresh();
   }
 
   setScope(scope: ViewScope) {
@@ -138,8 +149,16 @@ export class AstAnalysisTreeProvider
     }
 
     if (!element) {
+      const children = this._analysisData.children;
+      const sortedChildren =
+        this._sortMode === "alphabetical"
+          ? [...children].sort((a, b) =>
+              (a.label || "").localeCompare(b.label || "")
+            )
+          : children;
+
       return Promise.resolve(
-        this._analysisData.children.map(
+        sortedChildren.map(
           (child) =>
             new AstAnalysisTreeItem({
               label: child.label || "Root",
@@ -154,8 +173,16 @@ export class AstAnalysisTreeProvider
     }
 
     if (element.node.children) {
+      const children = element.node.children;
+      const sortedChildren =
+        this._sortMode === "alphabetical"
+          ? [...children].sort((a, b) =>
+              (a.label || "").localeCompare(b.label || "")
+            )
+          : children;
+
       return Promise.resolve(
-        element.node.children.map(
+        sortedChildren.map(
           (child) =>
             new AstAnalysisTreeItem({
               label: child.label || "Node",

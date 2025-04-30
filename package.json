@@ -40,18 +40,23 @@
     "commands": [
       {
         "command": "jxscout.toggleScope",
-        "title": "Toggle Project/File Scope",
+        "title": "Toggle project/file scope",
         "icon": "$(list-tree)"
       },
       {
         "command": "jxscout.navigateToMatch",
-        "title": "Navigate to Match",
+        "title": "Navigate to match",
         "icon": "$(arrow-right)"
       },
       {
         "command": "jxscout.copyValues",
-        "title": "Copy Values",
+        "title": "Copy values",
         "icon": "$(copy)"
+      },
+      {
+        "command": "jxscout.toggleSortMode",
+        "title": "Toggle sort mode",
+        "icon": "$(sort-precedence)"
       }
     ],
     "menus": {
@@ -64,6 +69,11 @@
         {
           "command": "jxscout.toggleScope",
           "when": "view == jxscoutFileView",
+          "group": "navigation"
+        },
+        {
+          "command": "jxscout.toggleSortMode",
+          "when": "view == jxscoutAstView",
           "group": "navigation"
         }
       ],

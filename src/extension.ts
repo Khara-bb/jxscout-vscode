@@ -122,6 +122,20 @@ export function activate(context: vscode.ExtensionContext) {
     }
   );
 
+  let toggleSortModeDisposable = vscode.commands.registerCommand(
+    "jxscout.toggleSortMode",
+    () => {
+      const newSortMode =
+        analysisTreeProvider.getSortMode() === "alphabetical"
+          ? "occurrence"
+          : "alphabetical";
+      analysisTreeProvider.setSortMode(newSortMode);
+      astView.title = `AST Analysis (${analysisTreeProvider.getScope()}) - ${
+        newSortMode === "alphabetical" ? "A-Z" : "By Occurrence"
+      }`;
+    }
+  );
+
   let currentDecorationType: vscode.TextEditorDecorationType | undefined;
 
   let navigateToMatchDisposable = vscode.commands.registerCommand(
@@ -195,6 +209,7 @@ export function activate(context: vscode.ExtensionContext) {
 
   context.subscriptions.push(
     disposable,
+    toggleSortModeDisposable,
     navigateToMatchDisposable,
     selectionChangeDisposable,
     editorChangeDisposable,
