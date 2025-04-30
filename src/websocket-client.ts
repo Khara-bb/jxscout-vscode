@@ -44,7 +44,7 @@ export interface ASTAnalyzerTreeNode {
   data?: any; // This will be typed based on the specific analyzer
   label?: string;
   description?: string;
-  iconPath?: string;
+  iconName?: string;
   tooltip?: string;
   children?: ASTAnalyzerTreeNode[];
 }

@@ -4,15 +4,32 @@ import { ASTAnalyzerTreeNode } from "./websocket-client";
 type ViewScope = "project" | "file";
 
 export class AstAnalysisTreeItem extends vscode.TreeItem {
-  constructor(
-    public readonly label: string,
-    public readonly collapsibleState: vscode.TreeItemCollapsibleState,
-    public readonly contextValue: string,
-    public readonly iconName?: string,
-    public readonly children?: ASTAnalyzerTreeNode[],
-    public readonly data?: any
-  ) {
+  public readonly children?: ASTAnalyzerTreeNode[];
+  public readonly data?: any;
+
+  constructor({
+    label,
+    collapsibleState,
+    iconName,
+    children,
+    data,
+    description,
+    tooltip,
+  }: {
+    label: string;
+    collapsibleState: vscode.TreeItemCollapsibleState;
+    contextValue: string;
+    iconName?: string;
+    children?: ASTAnalyzerTreeNode[];
+    data?: any;
+    description?: string;
+    tooltip?: string;
+  }) {
     super(label, collapsibleState);
+    this.description = description || "";
+    this.tooltip = tooltip;
+    this.children = children;
+    this.data = data;
     if (iconName) {
       this.iconPath = new vscode.ThemeIcon(iconName);
     }
@@ -72,34 +89,34 @@ export class AstAnalysisTreeProvider
 
     if (this._state === "loading") {
       return Promise.resolve([
-        new AstAnalysisTreeItem(
-          "Loading analysis...",
-          vscode.TreeItemCollapsibleState.None,
-          "loading",
-          "loading~spin"
-        ),
+        new AstAnalysisTreeItem({
+          label: "Loading analysis...",
+          collapsibleState: vscode.TreeItemCollapsibleState.None,
+          contextValue: "loading",
+          iconName: "loading~spin",
+        }),
       ]);
     }
 
     if (this._state === "asset-not-found") {
       return Promise.resolve([
-        new AstAnalysisTreeItem(
-          "This file is not tracked by jxscout",
-          vscode.TreeItemCollapsibleState.None,
-          "empty",
-          "info"
-        ),
+        new AstAnalysisTreeItem({
+          label: "This file is not tracked by jxscout",
+          collapsibleState: vscode.TreeItemCollapsibleState.None,
+          contextValue: "empty",
+          iconName: "info",
+        }),
       ]);
     }
 
     if (!this._analysisData?.children?.length) {
       return Promise.resolve([
-        new AstAnalysisTreeItem(
-          "No AST Analysis matches found",
-          vscode.TreeItemCollapsibleState.None,
-          "empty",
-          "info"
-        ),
+        new AstAnalysisTreeItem({
+          label: "No AST Analysis matches found",
+          collapsibleState: vscode.TreeItemCollapsibleState.None,
+          contextValue: "empty",
+          iconName: "info",
+        }),
       ]);
     }
 
@@ -107,47 +124,36 @@ export class AstAnalysisTreeProvider
       return Promise.resolve(
         this._analysisData.children.map(
           (child) =>
-            new AstAnalysisTreeItem(
-              child.label || "Root",
-              child.children?.length
+            new AstAnalysisTreeItem({
+              label: child.label || "Root",
+              collapsibleState: child.children?.length
                 ? vscode.TreeItemCollapsibleState.Expanded
                 : vscode.TreeItemCollapsibleState.None,
-              child.type || "navigation",
-              child.type === "match" ? "symbol-method" : "symbol-namespace",
-              child.children,
-              child.data
-            )
+              contextValue: child.type || "navigation",
+              iconName: child.iconName,
+              children: child.children,
+              data: child.data,
+            })
         )
       );
     }
 
-    if (element.contextValue === "navigation" && element.children) {
+    if (element.children) {
       return Promise.resolve(
         element.children.map(
           (child) =>
-            new AstAnalysisTreeItem(
-              child.label || "Node",
-              child.children?.length
+            new AstAnalysisTreeItem({
+              label: child.label || "Node",
+              collapsibleState: child.children?.length
                 ? vscode.TreeItemCollapsibleState.Expanded
                 : vscode.TreeItemCollapsibleState.None,
-              child.type || "navigation",
-              child.type === "match" ? "symbol-method" : "symbol-namespace",
-              child.children,
-              child.data
-            )
+              contextValue: child.type || "navigation",
+              iconName: child.iconName,
+              children: child.children,
+              data: child.data,
+            })
         )
       );
-    }
-
-    if (element.contextValue === "match" && element.data) {
-      return Promise.resolve([
-        new AstAnalysisTreeItem(
-          `Value: ${element.data.value}`,
-          vscode.TreeItemCollapsibleState.None,
-          "match-value",
-          "symbol-string"
-        ),
-      ]);
     }
 
     return Promise.resolve([]);
