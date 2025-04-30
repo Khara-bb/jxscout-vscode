@@ -66,29 +66,42 @@ export function activate(context: vscode.ExtensionContext) {
   async function updateASTAnalysis(editor: vscode.TextEditor | undefined) {
     if (!editor) {
       analysisTreeProvider.setAnalysisData(undefined);
+      analysisTreeProvider.setLoading(false);
+      analysisTreeProvider.setEmpty(false);
       return;
     }
 
     const document = editor.document;
     if (!document) {
       analysisTreeProvider.setAnalysisData(undefined);
+      analysisTreeProvider.setLoading(false);
+      analysisTreeProvider.setEmpty(false);
       return;
     }
+
+    analysisTreeProvider.setLoading(true);
+    analysisTreeProvider.setEmpty(false);
 
     try {
       const analysis = await wsClient.getAnalysis(document.uri.fsPath);
       analysisTreeProvider.setAnalysisData(analysis.results);
+      analysisTreeProvider.setEmpty(
+        !analysis.results || !analysis.results.children?.length
+      );
     } catch (error: any) {
       if (error?.message?.includes("asset not found")) {
         // it's expected that some assets are not tracked by jxscout,
-        // so silently ignore the error
-        return;
+        // so show empty state
+        analysisTreeProvider.setEmpty(true);
+        analysisTreeProvider.setAnalysisData(undefined);
+      } else {
+        vscode.window.showErrorMessage(
+          `Failed to get AST analysis: ${error.message}`
+        );
+        analysisTreeProvider.setAnalysisData(undefined);
       }
-
-      vscode.window.showErrorMessage(
-        `Failed to get AST analysis: ${error.message}`
-      );
-      analysisTreeProvider.setAnalysisData(undefined);
+    } finally {
+      analysisTreeProvider.setLoading(false);
     }
   }
 

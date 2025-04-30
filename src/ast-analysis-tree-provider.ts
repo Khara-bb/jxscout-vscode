@@ -27,8 +27,10 @@ export class AstAnalysisTreeProvider
     AstAnalysisTreeItem | undefined | null | void
   > = this._onDidChangeTreeData.event;
 
-  private _scope: ViewScope = "project";
+  private _scope: ViewScope = "file";
   private _analysisData?: ASTAnalyzerTreeNode;
+  private _isLoading: boolean = false;
+  private _isEmpty: boolean = false;
 
   getScope(): ViewScope {
     return this._scope;
@@ -36,6 +38,16 @@ export class AstAnalysisTreeProvider
 
   setScope(scope: ViewScope) {
     this._scope = scope;
+    this.refresh();
+  }
+
+  setLoading(isLoading: boolean) {
+    this._isLoading = isLoading;
+    this.refresh();
+  }
+
+  setEmpty(isEmpty: boolean) {
+    this._isEmpty = isEmpty;
     this.refresh();
   }
 
@@ -53,6 +65,28 @@ export class AstAnalysisTreeProvider
   }
 
   getChildren(element?: AstAnalysisTreeItem): Thenable<AstAnalysisTreeItem[]> {
+    if (this._isLoading) {
+      return Promise.resolve([
+        new AstAnalysisTreeItem(
+          "Loading analysis...",
+          vscode.TreeItemCollapsibleState.None,
+          "loading",
+          "loading~spin"
+        ),
+      ]);
+    }
+
+    if (this._isEmpty) {
+      return Promise.resolve([
+        new AstAnalysisTreeItem(
+          "No analysis available for this file",
+          vscode.TreeItemCollapsibleState.None,
+          "empty",
+          "info"
+        ),
+      ]);
+    }
+
     if (!this._analysisData) {
       return Promise.resolve([]);
     }
