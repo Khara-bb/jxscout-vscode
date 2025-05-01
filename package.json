@@ -38,7 +38,7 @@
           "when": "scope == project"
         },
         {
-          "type": "tree",
+          "type": "webview",
           "id": "jxscoutFileView",
           "name": "File Explorer",
           "icon": "files"

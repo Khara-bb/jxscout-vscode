@@ -6,9 +6,9 @@ import { ViewScope } from "../types";
 export function registerCommands(
   context: vscode.ExtensionContext,
   analysisTreeProvider: AstAnalysisTreeProvider,
-  explorerTreeProvider: FileExplorerTreeProvider,
+  explorerTreeProvider: FileExplorerTreeProvider | null,
   astView: vscode.TreeView<any>,
-  fileView: vscode.TreeView<any>
+  fileView: vscode.TreeView<any> | null
 ) {
   // Set initial scope context
   vscode.commands.executeCommand("setContext", "scope", "file");
@@ -24,10 +24,14 @@ export function registerCommands(
       vscode.commands.executeCommand("setContext", "scope", newScope);
 
       analysisTreeProvider.setScope(newScope);
-      explorerTreeProvider.setScope(newScope);
+      if (explorerTreeProvider) {
+        explorerTreeProvider.setScope(newScope);
+      }
       updateViewTitles(newScope);
       analysisTreeProvider.refresh();
-      explorerTreeProvider.refresh();
+      if (explorerTreeProvider) {
+        explorerTreeProvider.refresh();
+      }
     }
   );
 
@@ -40,7 +44,7 @@ export function registerCommands(
           ? "occurrence"
           : "alphabetical";
       analysisTreeProvider.setSortMode(newSortMode);
-      astView.title = `AST Analysis (${analysisTreeProvider.getScope()}) - ${
+      astView.title = `AST Analysis x(${analysisTreeProvider.getScope()}) - ${
         newSortMode === "alphabetical" ? "A-Z" : "By Occurrence"
       }`;
     }
@@ -102,6 +106,8 @@ export function registerCommands(
 
   function updateViewTitles(scope: ViewScope) {
     astView.title = `AST Analysis (${scope})`;
-    fileView.title = `File Explorer (${scope})`;
+    if (fileView) {
+      fileView.title = `File Explorer (${scope})`;
+    }
   }
 }

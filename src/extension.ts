@@ -35,22 +35,30 @@ export function activate(context: vscode.ExtensionContext) {
 
   // Create views and get providers
   const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath;
-  const { astView, fileView, analysisTreeProvider, explorerTreeProvider } =
-    createViews(context, workspaceRoot, wsClient);
+  const { astView, analysisTreeProvider } = createViews(
+    context,
+    workspaceRoot,
+    wsClient
+  );
 
   // Register commands
   registerCommands(
     context,
     analysisTreeProvider,
-    explorerTreeProvider,
+    null, // No longer need explorerTreeProvider
     astView,
-    fileView
+    null // No longer need fileView
   );
 
-  // Register premium view
+  // Register premium views
   const premiumViewProvider = PremiumView.getInstance();
   context.subscriptions.push(
     vscode.window.registerWebviewViewProvider("jxscoutPremiumView", {
+      resolveWebviewView: (webviewView, context, token) => {
+        premiumViewProvider.resolveWebviewView(webviewView, context, token);
+      },
+    }),
+    vscode.window.registerWebviewViewProvider("jxscoutFileView", {
       resolveWebviewView: (webviewView, context, token) => {
         premiumViewProvider.resolveWebviewView(webviewView, context, token);
       },

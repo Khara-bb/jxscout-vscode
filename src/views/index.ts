@@ -18,14 +18,8 @@ export function createViews(
     canSelectMany: true,
   });
 
-  const fileView = vscode.window.createTreeView("jxscoutFileView", {
-    treeDataProvider: explorerTreeProvider,
-    showCollapseAll: true,
-  });
-
   // Initial titles
   astView.title = "AST Analysis (File)";
-  fileView.title = "File Explorer (File)";
 
   // Register active editor change handler
   const editorChangeDisposable = vscode.window.onDidChangeActiveTextEditor(
@@ -34,11 +28,10 @@ export function createViews(
     }
   );
 
-  context.subscriptions.push(astView, fileView, editorChangeDisposable);
+  context.subscriptions.push(astView, editorChangeDisposable);
 
   return {
     astView,
-    fileView,
     analysisTreeProvider,
     explorerTreeProvider,
   };
