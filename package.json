@@ -27,7 +27,15 @@
           "type": "tree",
           "id": "jxscoutAstView",
           "name": "AST Analysis",
-          "icon": "symbol-structure"
+          "icon": "symbol-structure",
+          "when": "scope == file"
+        },
+        {
+          "type": "webview",
+          "id": "jxscoutPremiumView",
+          "name": "AST Analysis",
+          "icon": "symbol-structure",
+          "when": "scope == project"
         },
         {
           "type": "tree",
@@ -74,6 +82,16 @@
         {
           "command": "jxscout.toggleSortMode",
           "when": "view == jxscoutAstView",
+          "group": "navigation"
+        },
+        {
+          "command": "jxscout.toggleScope",
+          "when": "view == jxscoutPremiumView",
+          "group": "navigation"
+        },
+        {
+          "command": "jxscout.toggleSortMode",
+          "when": "view == jxscoutPremiumView",
           "group": "navigation"
         }
       ],

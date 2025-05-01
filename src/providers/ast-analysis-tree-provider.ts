@@ -93,6 +93,10 @@ export class AstAnalysisTreeProvider
   }
 
   getChildren(element?: AstAnalysisTreeItem): Thenable<AstAnalysisTreeItem[]> {
+    if (this._scope === "project") {
+      return Promise.resolve([]);
+    }
+
     if (this._state === "empty") {
       return Promise.resolve([]);
     }

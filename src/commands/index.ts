@@ -10,12 +10,18 @@ export function registerCommands(
   astView: vscode.TreeView<any>,
   fileView: vscode.TreeView<any>
 ) {
+  // Set initial scope context
+  vscode.commands.executeCommand("setContext", "scope", "file");
+
   // Toggle scope command
   const toggleScopeDisposable = vscode.commands.registerCommand(
     "jxscout.toggleScope",
     () => {
       const newScope =
         analysisTreeProvider.getScope() === "project" ? "file" : "project";
+
+      // Update the context key
+      vscode.commands.executeCommand("setContext", "scope", newScope);
 
       analysisTreeProvider.setScope(newScope);
       explorerTreeProvider.setScope(newScope);

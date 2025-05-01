@@ -2,6 +2,7 @@ import * as vscode from "vscode";
 import { WebSocketClient } from "./services/websocket-client";
 import { createViews } from "./views";
 import { registerCommands } from "./commands";
+import { PremiumView } from "./views/premium-view";
 
 export function activate(context: vscode.ExtensionContext) {
   // Initialize WebSocket client
@@ -44,6 +45,16 @@ export function activate(context: vscode.ExtensionContext) {
     explorerTreeProvider,
     astView,
     fileView
+  );
+
+  // Register premium view
+  const premiumViewProvider = PremiumView.getInstance();
+  context.subscriptions.push(
+    vscode.window.registerWebviewViewProvider("jxscoutPremiumView", {
+      resolveWebviewView: (webviewView, context, token) => {
+        premiumViewProvider.resolveWebviewView(webviewView, context, token);
+      },
+    })
   );
 
   // Add status bar items to subscriptions
