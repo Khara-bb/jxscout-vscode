@@ -34,59 +34,60 @@ export class PremiumView {
             <style>
                 body {
                     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
-                    padding: 1.5rem;
+                    padding: 1rem;
                     background: var(--vscode-editor-background);
                     color: var(--vscode-editor-foreground);
-                    display: flex;
-                    flex-direction: column;
-                    align-items: center;
-                    justify-content: center;
-                    min-height: 100vh;
                     margin: 0;
                 }
                 .container {
                     max-width: 100%;
-                    text-align: center;
                 }
                 .icon {
-                    font-size: 3rem;
-                    margin-bottom: 1rem;
+                    font-size: 2rem;
+                    margin-bottom: 0.5rem;
                     color: #6c5ce7;
+                    text-align: center;
                 }
                 h1 {
-                    font-size: 1.5rem;
-                    margin-bottom: 0.75rem;
+                    font-size: 1.2rem;
+                    margin-bottom: 0.5rem;
                     color: var(--vscode-editor-foreground);
+                    text-align: center;
                 }
                 p {
-                    font-size: 1rem;
-                    line-height: 1.5;
-                    margin-bottom: 1.5rem;
+                    font-size: 0.9rem;
+                    line-height: 1.4;
+                    margin-bottom: 1rem;
                     color: var(--vscode-descriptionForeground);
+                    text-align: center;
                 }
                 .features {
                     text-align: left;
-                    margin: 1.5rem 0;
+                    margin: 1rem 0;
                     padding: 0;
                 }
                 .features li {
-                    margin-bottom: 0.75rem;
+                    margin-bottom: 0.5rem;
                     display: flex;
                     align-items: center;
-                    font-size: 0.9rem;
+                    font-size: 0.85rem;
                 }
                 .features li:before {
                     content: "✓";
                     color: #6c5ce7;
-                    margin-right: 0.75rem;
+                    margin-right: 0.5rem;
                     font-weight: bold;
+                }
+                .button-container {
+                    text-align: center;
+                    margin-top: 1rem;
                 }
                 .button {
                     background: #6c5ce7;
                     color: white;
                     border: none;
-                    padding: 0.75rem 1.5rem;
-                    font-size: 1rem;
+                    padding: 0.5rem 1rem;
+                    font-size: 0.9rem;
                     border-radius: 4px;
                     cursor: pointer;
                     transition: background 0.3s;
@@ -101,17 +102,18 @@ export class PremiumView {
         <body>
             <div class="container">
                 <div class="icon">🚀</div>
-                <h1>Unlock Project Analysis</h1>
-                <p>Upgrade to jxscout Premium to analyze your entire project and get deeper insights into your codebase.</p>
+                <h1>Unlock Advanced Features</h1>
                 
                 <ul class="features">
-                    <li>Analyze multiple files simultaneously</li>
-                    <li>Get project-wide code patterns and insights</li>
-                    <li>Track code quality across your entire project</li>
-                    <li>Advanced project statistics and metrics</li>
+                    <li>Visualize HTML, JS, and source map relationships</li>
+                    <li>Navigate between related files</li>
+                    <li>Analyze all project files at once</li>
+                    <li>Get comprehensive AST insights</li>
                 </ul>
 
-                <a href="https://jxscout.com/premium" class="button">Upgrade to Premium</a>
+                <div class="button-container">
+                    <a href="https://jxscout.com/premium" class="button">Learn more</a>
+                </div>
             </div>
         </body>
         </html>`;
