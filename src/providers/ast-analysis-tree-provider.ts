@@ -158,7 +158,7 @@ export class AstAnalysisTreeProvider
             new AstAnalysisTreeItem({
               label: node.label || "Root",
               collapsibleState: node.children?.length
-                ? vscode.TreeItemCollapsibleState.Collapsed
+                ? vscode.TreeItemCollapsibleState.Expanded
                 : vscode.TreeItemCollapsibleState.None,
               iconName: node.iconName,
               node: node,
