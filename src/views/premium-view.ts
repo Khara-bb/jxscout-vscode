@@ -105,14 +105,13 @@ export class PremiumView {
                 <h1>Unlock Advanced Features</h1>
                 
                 <ul class="features">
-                    <li>Visualize HTML, JS, and source map relationships</li>
-                    <li>Navigate between related files</li>
-                    <li>Analyze all project files at once</li>
-                    <li>Get comprehensive AST insights</li>
+                    <li>Project level AST analysis</li>
+                    <li>Enchanced project navigation</li>
+                    <li>Visualize HTML, JS and Source Map relationships</li>
                 </ul>
 
                 <div class="button-container">
-                    <a href="https://jxscout.com/premium" class="button">Learn more</a>
+                    <a href="https://vscode.jxscout.app" class="button">Learn more</a>
                 </div>
             </div>
         </body>
