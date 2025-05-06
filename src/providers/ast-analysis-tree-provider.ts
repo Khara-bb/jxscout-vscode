@@ -162,6 +162,7 @@ export class AstAnalysisTreeProvider
                 : vscode.TreeItemCollapsibleState.None,
               iconName: node.iconName,
               node: node,
+              description: node.description,
             })
         )
       );
@@ -186,6 +187,7 @@ export class AstAnalysisTreeProvider
                 : vscode.TreeItemCollapsibleState.None,
               iconName: child.iconName,
               node: child,
+              description: child.description,
             })
         )
       );
