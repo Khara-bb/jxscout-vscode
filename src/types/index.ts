@@ -28,7 +28,7 @@ export interface ASTAnalyzerTreeNode {
 
 export interface AnalysisResult {
   filePath: string;
-  results: ASTAnalyzerTreeNode;
+  results: ASTAnalyzerTreeNode[];
 }
 
 export type ViewScope = "project" | "file";

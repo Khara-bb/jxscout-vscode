@@ -49,7 +49,7 @@ export class AstAnalysisTreeProvider
   > = this._onDidChangeTreeData.event;
 
   private _scope: ViewScope = "file";
-  private _analysisData?: ASTAnalyzerTreeNode;
+  private _analysisData?: ASTAnalyzerTreeNode[];
   private _state: TreeState = "loading";
   private _sortMode: SortMode = "occurrence";
 
@@ -79,7 +79,7 @@ export class AstAnalysisTreeProvider
     this.refresh();
   }
 
-  setAnalysisData(data: ASTAnalyzerTreeNode | undefined) {
+  setAnalysisData(data: ASTAnalyzerTreeNode[] | undefined) {
     this._analysisData = data;
     this.refresh();
   }
@@ -129,7 +129,7 @@ export class AstAnalysisTreeProvider
       ]);
     }
 
-    if (!this._analysisData?.children?.length) {
+    if (!this._analysisData?.length) {
       return Promise.resolve([
         new AstAnalysisTreeItem({
           label: "No AST Analysis matches found",
@@ -144,41 +144,41 @@ export class AstAnalysisTreeProvider
     }
 
     if (!element) {
-      const children = this._analysisData.children;
-      const sortedChildren =
+      const sortedNodes =
         this._sortMode === "alphabetical"
-          ? [...children].sort((a, b) =>
-              (a.label || "").localeCompare(b.label || "")
+          ? [...this._analysisData].sort(
+              (a: ASTAnalyzerTreeNode, b: ASTAnalyzerTreeNode) =>
+                (a.label || "").localeCompare(b.label || "")
             )
-          : children;
+          : this._analysisData;
 
       return Promise.resolve(
-        sortedChildren.map(
-          (child) =>
+        sortedNodes.map(
+          (node: ASTAnalyzerTreeNode) =>
             new AstAnalysisTreeItem({
-              label: child.label || "Root",
-              collapsibleState: child.children?.length
+              label: node.label || "Root",
+              collapsibleState: node.children?.length
                 ? vscode.TreeItemCollapsibleState.Expanded
                 : vscode.TreeItemCollapsibleState.None,
-              iconName: child.iconName,
-              node: child,
+              iconName: node.iconName,
+              node: node,
             })
         )
       );
     }
 
     if (element.node.children) {
-      const children = element.node.children;
       const sortedChildren =
         this._sortMode === "alphabetical"
-          ? [...children].sort((a, b) =>
-              (a.label || "").localeCompare(b.label || "")
+          ? [...element.node.children].sort(
+              (a: ASTAnalyzerTreeNode, b: ASTAnalyzerTreeNode) =>
+                (a.label || "").localeCompare(b.label || "")
             )
-          : children;
+          : element.node.children;
 
       return Promise.resolve(
         sortedChildren.map(
-          (child) =>
+          (child: ASTAnalyzerTreeNode) =>
             new AstAnalysisTreeItem({
               label: child.label || "Node",
               collapsibleState: child.children?.length
