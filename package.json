@@ -9,9 +9,6 @@
   "categories": [
     "Other"
   ],
-  "files": [
-    "resources/icons/*"
-  ],
   "main": "./dist/extension.js",
   "enabledApiProposals": [
     "contribViewContainerTitle"
