@@ -6,6 +6,8 @@ import {
   ViewScope,
   SortMode,
 } from "../types";
+import * as path from "path";
+import * as fs from "fs";
 
 export class AstAnalysisTreeItem extends vscode.TreeItem {
   public readonly node: ASTAnalyzerTreeNode;
@@ -33,7 +35,24 @@ export class AstAnalysisTreeItem extends vscode.TreeItem {
     }
 
     if (iconName) {
-      this.iconPath = new vscode.ThemeIcon(iconName);
+      if (iconName.startsWith("resources:")) {
+        const iconPath = iconName.replace("resources:", "");
+
+        const iconUri = path.join(
+          __filename,
+          "..",
+          "..",
+          "resources",
+          "icons",
+          `${iconPath}.svg`
+        );
+        this.iconPath = {
+          light: vscode.Uri.file(iconUri),
+          dark: vscode.Uri.file(iconUri),
+        };
+      } else {
+        this.iconPath = new vscode.ThemeIcon(iconName);
+      }
     }
   }
 }

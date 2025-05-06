@@ -68,10 +68,11 @@ export function activate(context: vscode.ExtensionContext) {
   // Add status bar items to subscriptions
   context.subscriptions.push(connectionStatusBarItem);
 
-  // Clean up WebSocket connection on deactivation
+  // Clean up WebSocket connection and providers on deactivation
   context.subscriptions.push({
     dispose: () => {
       wsClient.disconnect();
+      analysisTreeProvider.dispose();
     },
   });
 }
