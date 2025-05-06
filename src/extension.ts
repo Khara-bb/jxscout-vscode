@@ -72,7 +72,6 @@ export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push({
     dispose: () => {
       wsClient.disconnect();
-      analysisTreeProvider.dispose();
     },
   });
 }
