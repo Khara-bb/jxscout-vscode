@@ -97,11 +97,74 @@ export function registerCommands(
     }
   );
 
+  // Copy paths for bruteforcing
+  const copyPathsDisposable = vscode.commands.registerCommand(
+    "jxscout.copyPaths",
+    async () => {
+      const selectedItems = astView.selection;
+      if (!selectedItems || selectedItems.length === 0) {
+        return;
+      }
+
+      const values = selectedItems
+        .filter((item) => item.node.type === "match")
+        .filter((item) => item.node.data.extra && item.node.data.extra.pathname)
+        .map((item) => item.node.data.extra.pathname);
+
+      if (values.length > 0) {
+        await vscode.env.clipboard.writeText(values.join("\n"));
+        vscode.window.showInformationMessage(
+          `Copied ${values.length} values to clipboard`
+        );
+      } else {
+        vscode.window.showInformationMessage("No paths found");
+      }
+    }
+  );
+
+  // Copy paths for bruteforcing
+  const copyQueryParamsDisposable = vscode.commands.registerCommand(
+    "jxscout.copyQueryParams",
+    async () => {
+      const selectedItems = astView.selection;
+      if (!selectedItems || selectedItems.length === 0) {
+        return;
+      }
+
+      const allQueryParams = new Set<string>();
+
+      const values = selectedItems
+        .filter((item) => item.node.type === "match")
+        .filter(
+          (item) => item.node.data.extra && item.node.data.extra["query-params"]
+        )
+        .map(
+          (item) => new URLSearchParams(item.node.data.extra["query-params"])
+        )
+        .map((params) => {
+          for (const [key] of params.entries()) {
+            allQueryParams.add(key);
+          }
+        });
+
+      if (allQueryParams.size > 0) {
+        await vscode.env.clipboard.writeText([...allQueryParams].join("\n"));
+        vscode.window.showInformationMessage(
+          `Copied ${values.length} values to clipboard`
+        );
+      } else {
+        vscode.window.showInformationMessage("No query params found");
+      }
+    }
+  );
+
   context.subscriptions.push(
     toggleScopeDisposable,
     toggleSortModeDisposable,
     navigateToMatchDisposable,
-    copyValuesDisposable
+    copyValuesDisposable,
+    copyPathsDisposable,
+    copyQueryParamsDisposable
   );
 
   function updateViewTitles(scope: ViewScope) {

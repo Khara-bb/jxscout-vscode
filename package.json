@@ -64,6 +64,16 @@
         "icon": "$(copy)"
       },
       {
+        "command": "jxscout.copyPaths",
+        "title": "Copy paths for bruteforcing",
+        "icon": "$(copy)"
+      },
+      {
+        "command": "jxscout.copyQueryParams",
+        "title": "Copy query params",
+        "icon": "$(copy)"
+      },
+      {
         "command": "jxscout.toggleSortMode",
         "title": "Toggle sort mode",
         "icon": "$(sort-precedence)"
@@ -100,7 +110,17 @@
       "view/item/context": [
         {
           "command": "jxscout.copyValues",
-          "when": "view == jxscoutAstView && viewItem =~ /match/",
+          "when": "view == jxscoutAstView",
+          "group": "1_modification"
+        },
+        {
+          "command": "jxscout.copyPaths",
+          "when": "view == jxscoutAstView",
+          "group": "1_modification"
+        },
+        {
+          "command": "jxscout.copyQueryParams",
+          "when": "view == jxscoutAstView",
           "group": "1_modification"
         }
       ]
