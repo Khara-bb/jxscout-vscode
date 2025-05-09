@@ -137,12 +137,12 @@ export class AstAnalysisTreeProvider
     if (this._state === "asset-not-found") {
       return Promise.resolve([
         new AstAnalysisTreeItem({
-          label: "This file is not tracked by jxscout",
+          label: "This file is not tracked or supported by jxscout",
           collapsibleState: vscode.TreeItemCollapsibleState.None,
           iconName: "info",
           node: {
             type: "navigation",
-            label: "This file is not tracked by jxscout",
+            label: "This file is not tracked or supported by jxscout",
           },
         }),
       ]);
