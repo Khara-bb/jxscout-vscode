@@ -4,7 +4,7 @@
   "description": "jxscout extension for VSCode",
   "version": "0.0.1",
   "engines": {
-    "vscode": "^1.99.0"
+    "vscode": "^1.92.0"
   },
   "categories": [
     "Other"
@@ -157,7 +157,8 @@
   },
   "devDependencies": {
     "@types/node": "20.x",
-    "@types/vscode": "^1.99.0",
+    "@types/uuid": "^10.0.0",
+    "@types/vscode": "^1.92.0",
     "@types/ws": "^8.18.1",
     "@typescript-eslint/eslint-plugin": "^8.28.0",
     "@typescript-eslint/parser": "^8.28.0",
