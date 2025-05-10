@@ -4,11 +4,11 @@ A VSCode extension for integrating with [jxscout](https://github.com/franciscone
 
 ## Features
 
-- Visualize references to behavior interestinig for security researchers
-- Copy paths, query params and hostnames for burteforcing
+- Visualize references to behavior interesting for security researchers
+- Copy paths, query parameters, and hostnames for brute forcing
 - TODO: Project-level visualization of discoveries
 - TODO: Project-level navigation of assets
-- TODO: Visualization of relationships between HTML, JS and Source Maps
+- TODO: Visualization of relationships between HTML, JS, and Source Maps
 
 ## Demo
 
@@ -18,7 +18,7 @@ https://github.com/user-attachments/assets/3b086005-f105-41a1-8741-faa26c17d8d0
 
 1. Download the latest `.vsix` file from the [releases](https://github.com/francisconeves97/jxscout-vscode/releases) page
 2. In VSCode, open the extensions sidebar menu
-3. Click the three dots on top and select "Install from VSIX..."
+3. Click the three dots at the top and select "Install from VSIX..."
 4. Select the `.vsix` file you just downloaded
 
 ![install](./docs/install.png)
@@ -40,7 +40,7 @@ The extension can be configured through VSCode settings:
 
 ## Requirements
 
-- A running jxscout >=0.7.0 server
+- A running jxscout server (version >=0.7.0)
 
 ## License
 
@@ -48,7 +48,7 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 
 ## Contributing
 
-Feel free to leave suggestions and open pull requests, all contributions are welcome!
+Feel free to leave suggestions and open pull requests - all contributions are welcome!
 
 ## Support
 
