@@ -12,7 +12,7 @@ A VSCode extension for integrating with [jxscout](https://github.com/franciscone
 
 ## Demo
 
-https://github.com/user-attachments/assets/3f5895f4-f5a3-4c4c-8eea-3ecd2ea9e750
+https://github.com/user-attachments/assets/b32294ff-8942-46eb-9033-2e2632818787
 
 ## Installation
 
