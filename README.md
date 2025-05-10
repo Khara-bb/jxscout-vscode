@@ -4,12 +4,24 @@ A VSCode extension for integrating with [jxscout](https://github.com/franciscone
 
 ## Features
 
-- Automatic discovery of code relevant to security tests
+- Visualize references to behavior interestinig for security researchers
+- Copy paths, query params and hostnames for burteforcing
 - TODO: Project-level visualization of discoveries
 - TODO: Project-level navigation of assets
 - TODO: Visualization of relationships between HTML, JS and Source Maps
 
 ## Demo
+
+https://github.com/user-attachments/assets/3b086005-f105-41a1-8741-faa26c17d8d0
+
+## Installation
+
+1. Download the latest `.vsix` file from the [releases](https://github.com/francisconeves97/jxscout-vscode/releases) page
+2. In VSCode, open the extensions sidebar menu
+3. Click the three dots on top and select "Install from VSIX..."
+4. Select the `.vsix` file you just downloaded
+
+![install](./docs/install.png)
 
 ## Configuration
 
@@ -25,61 +37,23 @@ The extension can be configured through VSCode settings:
 1. Open a JavaScript file in VSCode
 2. The extension will automatically connect to the jxscout server and request analysis
 3. Analysis results will be displayed in the jxscout Analysis panel
-4. Use the refresh button to manually update the analysis
 
 ## Requirements
 
-- A running jxscout >=0.6.0 server
-
-## Extension Settings
-
-This extension contributes the following settings:
-
-- `jxscout.serverHost`: Hostname of the jxscout WebSocket server
-- `jxscout.serverPort`: Port of the jxscout WebSocket server
-
-## Development
-
-### Prerequisites
-
-- Node.js and npm installed
-- VS Code
-- Recommended VS Code extensions:
-  - amodio.tsl-problem-matcher
-  - ms-vscode.extension-test-runner
-  - dbaeumer.vscode-eslint
-
-### Getting Started
-
-1. Clone the repository
-2. Install dependencies:
-   ```bash
-   npm install
-   ```
-3. Press `F5` to open a new window with your extension loaded
-4. Run your command from the command palette (`Ctrl+Shift+P` or `Cmd+Shift+P` on Mac)
-5. Set breakpoints in your code inside `src/extension.ts` to debug your extension
-6. Find output from your extension in the debug console
-
-### Making Changes
-
-- You can relaunch the extension from the debug toolbar after changing code
-- You can also reload (`Ctrl+R` or `Cmd+R` on Mac) the VS Code window with your extension to load your changes
-
-### Building the Extension
-
-To build the extension for distribution:
-
-```bash
-npm run compile
-```
-
-This will create a production build in the `dist` directory.
-
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
+- A running jxscout >=0.7.0 server
 
 ## License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
+
+## Contributing
+
+Feel free to leave suggestions and open pull requests, all contributions are welcome!
+
+## Support
+
+Happy hunting! 🐛 If jxscout helped you find cool bugs, [consider buying me a coffee](https://ko-fi.com/francisconeves97)! ☕
+
+## License
+
+This project is licensed under the GNU General Public License. See the COPYING file for the full license text.
