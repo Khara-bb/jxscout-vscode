@@ -1,13 +1,15 @@
 # jxscout-vscode
 
-A VSCode extension for integrating with jxscout, a tool that automatically saves JS files and performs AST analysis.
+A VSCode extension for integrating with [jxscout](https://github.com/francisconeves97/jxscout), a tool that automatically saves JS files and performs AST analysis.
 
 ## Features
 
-- Real-time AST analysis of JavaScript files
-- Tree view displaying analysis results organized by analyzer type
-- Automatic updates when switching between files
-- Configurable WebSocket server connection
+- Automatic discovery of code relevant to security tests
+- TODO: Project-level visualization of discoveries
+- TODO: Project-level navigation of assets
+- TODO: Visualization of relationships between HTML, JS and Source Maps
+
+## Demo
 
 ## Configuration
 
@@ -17,12 +19,6 @@ The extension can be configured through VSCode settings:
 | -------------------- | ---------------------------------------- | ----------- |
 | `jxscout.serverHost` | Hostname of the jxscout WebSocket server | `localhost` |
 | `jxscout.serverPort` | Port of the jxscout WebSocket server     | `3333`      |
-
-You can access these settings by:
-
-1. Opening the Command Palette (Ctrl+Shift+P / Cmd+Shift+P)
-2. Typing "Open jxscout Settings"
-3. Or clicking on the jxscout status bar item
 
 ## Usage
 

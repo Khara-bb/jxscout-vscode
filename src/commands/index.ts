@@ -88,10 +88,12 @@ export function registerCommands(
         .map((item) => item.node.data.value)
         .join("\n");
 
-      if (values) {
-        await vscode.env.clipboard.writeText(values);
+      const uniqueValues = new Set(values);
+
+      if (uniqueValues.size > 0) {
+        await vscode.env.clipboard.writeText([...uniqueValues].join("\n"));
         vscode.window.showInformationMessage(
-          `Copied ${selectedItems.length} values to clipboard`
+          `Copied ${uniqueValues.size} values to clipboard`
         );
       }
     }
@@ -111,13 +113,42 @@ export function registerCommands(
         .filter((item) => item.node.data.extra && item.node.data.extra.pathname)
         .map((item) => item.node.data.extra.pathname);
 
-      if (values.length > 0) {
-        await vscode.env.clipboard.writeText(values.join("\n"));
+      const uniqueValues = new Set(values);
+
+      if (uniqueValues.size > 0) {
+        await vscode.env.clipboard.writeText([...uniqueValues].join("\n"));
         vscode.window.showInformationMessage(
-          `Copied ${values.length} values to clipboard`
+          `Copied ${uniqueValues.size} values to clipboard`
         );
       } else {
         vscode.window.showInformationMessage("No paths found");
+      }
+    }
+  );
+
+  // Copy hostnames command
+  const copyHostnamesDisposable = vscode.commands.registerCommand(
+    "jxscout.copyHostnames",
+    async () => {
+      const selectedItems = astView.selection;
+      if (!selectedItems || selectedItems.length === 0) {
+        return;
+      }
+
+      const values = selectedItems
+        .filter((item) => item.node.type === "match")
+        .filter((item) => item.node.data.extra && item.node.data.extra.hostname)
+        .map((item) => item.node.data.extra.hostname);
+
+      const uniqueValues = new Set(values);
+
+      if (uniqueValues.size > 0) {
+        await vscode.env.clipboard.writeText([...uniqueValues].join("\n"));
+        vscode.window.showInformationMessage(
+          `Copied ${uniqueValues.size} values to clipboard`
+        );
+      } else {
+        vscode.window.showInformationMessage("No hostnames found");
       }
     }
   );
@@ -150,7 +181,7 @@ export function registerCommands(
       if (allQueryParams.size > 0) {
         await vscode.env.clipboard.writeText([...allQueryParams].join("\n"));
         vscode.window.showInformationMessage(
-          `Copied ${values.length} values to clipboard`
+          `Copied ${allQueryParams.size} values to clipboard`
         );
       } else {
         vscode.window.showInformationMessage("No query params found");
@@ -164,7 +195,8 @@ export function registerCommands(
     navigateToMatchDisposable,
     copyValuesDisposable,
     copyPathsDisposable,
-    copyQueryParamsDisposable
+    copyQueryParamsDisposable,
+    copyHostnamesDisposable
   );
 
   function updateViewTitles(scope: ViewScope) {

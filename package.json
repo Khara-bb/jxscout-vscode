@@ -6,7 +6,8 @@
     "type": "git",
     "url": "https://github.com/jxscout/jxscout-vscode"
   },
-  "version": "0.0.1",
+  "version": "0.0.2",
+  "publisher": "jxscout",
   "engines": {
     "vscode": "^1.92.0"
   },
@@ -70,7 +71,12 @@
       },
       {
         "command": "jxscout.copyPaths",
-        "title": "Copy paths for bruteforcing",
+        "title": "Copy paths",
+        "icon": "$(copy)"
+      },
+      {
+        "command": "jxscout.copyHostnames",
+        "title": "Copy hostnames",
         "icon": "$(copy)"
       },
       {
@@ -125,6 +131,11 @@
         },
         {
           "command": "jxscout.copyQueryParams",
+          "when": "view == jxscoutAstView",
+          "group": "1_modification"
+        },
+        {
+          "command": "jxscout.copyHostnames",
           "when": "view == jxscoutAstView",
           "group": "1_modification"
         }
