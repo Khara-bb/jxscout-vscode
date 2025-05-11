@@ -1,8 +1,9 @@
 name: Release VS Code Extension
 
 on:
-  release:
-    types: [created]
+  push:
+    tags:
+      - "v*"
 
 jobs:
   build:
@@ -24,8 +25,11 @@ jobs:
       - name: Package extension
         run: npx @vscode/vsce package
 
-      - name: Upload extension
-        uses: actions/upload-artifact@v4
+      - name: Create Release
+        id: create_release
+        uses: softprops/action-gh-release@v1
         with:
-          name: jxscout-vscode-${{ github.event.release.tag_name }}.vsix
-          path: jxscout-vscode-*.vsix
+          files: jxscout-vscode-*.vsix
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
