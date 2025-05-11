@@ -1,20 +1,30 @@
-name: Release VS Code Extension
+name: 🚀 Release VS Code Extension
 
 on:
-  push:
-    tags:
-      - "v*"
+  workflow_dispatch:
+
+env:
+  NODE_VERSION: "20"
+  PROJECT_NAME: jxscout-vscode
 
 jobs:
-  build:
+  release:
+    name: Release
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout project
+        uses: actions/checkout@v4
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: Get version from package.json
+        id: get_version
+        run: echo "VERSION=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
 
       - name: Install dependencies
         run: npm ci
@@ -25,11 +35,14 @@ jobs:
       - name: Package extension
         run: npx @vscode/vsce package
 
-      - name: Create Release
-        id: create_release
+      - name: Create release
         uses: softprops/action-gh-release@v1
         with:
-          files: jxscout-vscode-*.vsix
-          generate_release_notes: true
+          tag_name: v${{ steps.get_version.outputs.VERSION }}
+          name: Release v${{ steps.get_version.outputs.VERSION }}
+          draft: false
+          prerelease: false
+          files: |
+            ${{ env.PROJECT_NAME }}-*.vsix
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
