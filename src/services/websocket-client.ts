@@ -1,27 +1,43 @@
 import * as vscode from "vscode";
 import WebSocket from "ws";
 import { v4 as uuidv4 } from "uuid";
+import { AnalysisResult, Position } from "../types";
 
-export interface Position {
-  column: number;
-  line: number;
+enum MessageType {
+  GetAnalysisRequest = "getAnalysisRequest",
+  GetAnalysisResponse = "getAnalysisResponse",
+
+  Error = "error",
 }
 
-export interface Finding {
+export interface AnalyzerMatch {
+  filePath: string;
+  analyzerName: string;
+  value: string;
   start: Position;
   end: Position;
-  value: string;
 }
 
-export interface AnalysisResult {
-  filePath: string;
-  results: Record<string, Finding[]>;
-}
+export type WebsocketError = {
+  message: string;
+};
+
+export type WebsocketMessage = {
+  type: MessageType;
+  id: string;
+  payload: any;
+  error?: WebsocketError;
+};
 
 export class WebSocketClient {
   private ws: WebSocket | null = null;
-  private messageCallbacks: Map<string, (result: AnalysisResult) => void> =
-    new Map();
+  private messageCallbacks: Map<
+    string,
+    {
+      resolve: (result: AnalysisResult) => void;
+      reject: (error: Error) => void;
+    }
+  > = new Map();
   private reconnectTimeout: NodeJS.Timeout | null = null;
   private readonly reconnectDelay = 5000; // 5 seconds
   private serverUrl: string;
@@ -83,25 +99,24 @@ export class WebSocketClient {
     }, this.reconnectDelay);
   }
 
-  private handleMessage(message: any) {
-    const { type, id, payload } = message;
+  private handleMessage(message: WebsocketMessage) {
+    const { type, id, payload, error } = message;
 
     switch (type) {
-      case "analysis":
+      case MessageType.GetAnalysisResponse:
         const callback = this.messageCallbacks.get(id);
         if (callback) {
-          callback(payload);
+          if (error) {
+            callback.reject(new Error(error.message));
+          } else {
+            callback.resolve(payload);
+          }
           this.messageCallbacks.delete(id);
         }
         break;
-      case "error":
-        console.error("Server error:", payload.message);
-        if (payload.message.includes("asset not found")) {
-          return; // ignore asset not found errors
-        }
-        vscode.window.showErrorMessage(
-          `jxscout analysis error: ${payload.message}`
-        );
+      case MessageType.Error:
+        console.error("Server error:", error?.message);
+        vscode.window.showErrorMessage(`jxscout error: ${error?.message}`);
         break;
       default:
         console.warn("Unknown message type:", type);
@@ -117,35 +132,14 @@ export class WebSocketClient {
 
       const messageId = uuidv4();
       const message = {
-        type: "getAnalysis",
+        type: MessageType.GetAnalysisRequest,
         id: messageId,
         payload: {
           filePath: filePath,
         },
       };
 
-      this.messageCallbacks.set(messageId, resolve);
-      this.ws.send(JSON.stringify(message));
-    });
-  }
-
-  async forceReanalysis(filePath: string): Promise<AnalysisResult> {
-    return new Promise((resolve, reject) => {
-      if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
-        reject(new Error("WebSocket is not connected"));
-        return;
-      }
-
-      const messageId = uuidv4();
-      const message = {
-        type: "forceReanalysis",
-        id: messageId,
-        payload: {
-          filePath: filePath,
-        },
-      };
-
-      this.messageCallbacks.set(messageId, resolve);
+      this.messageCallbacks.set(messageId, { resolve, reject });
       this.ws.send(JSON.stringify(message));
     });
   }

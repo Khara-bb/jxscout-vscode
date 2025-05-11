@@ -1,17 +1,24 @@
 {
   "name": "jxscout-vscode",
   "displayName": "jxscout-vscode",
-  "description": "jxscout extension for VSCode to help security researchers analyze JS files.",
-  "version": "0.0.1",
-  "engines": {
-    "vscode": "^1.99.0"
+  "description": "jxscout extension for VSCode",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jxscout/jxscout-vscode"
   },
+  "version": "0.0.2",
+  "publisher": "jxscout",
+  "engines": {
+    "vscode": "^1.92.0"
+  },
+  "icon": "resources/logo.png",
   "categories": [
     "Other"
   ],
-  "activationEvents": [
-  ],
   "main": "./dist/extension.js",
+  "enabledApiProposals": [
+    "contribViewContainerTitle"
+  ],
   "contributes": {
     "viewsContainers": {
       "activitybar": [
@@ -26,92 +33,126 @@
       "jxscout-sidebar": [
         {
           "type": "tree",
-          "id": "jxscoutAnalysis",
-          "name": "Analysis Results",
-          "when": "true",
-          "buttons": [
-          ]
-        }
-      ]
-    },
-    "menus": {
-      "view/title": [
+          "id": "jxscoutAstView",
+          "name": "AST Analysis",
+          "icon": "symbol-structure",
+          "when": "scope == file"
+        },
         {
-          "command": "jxscout-vscode.copySelectedItems",
-          "when": "view == jxscoutAnalysis",
-          "group": "navigation"
-        }
-      ],
-      "view/item/context": [
+          "type": "webview",
+          "id": "jxscoutPremiumView",
+          "name": "AST Analysis",
+          "icon": "symbol-structure",
+          "when": "scope == project"
+        },
         {
-          "command": "jxscout-vscode.copySelectedItems",
-          "when": "view == jxscoutAnalysis && viewItem == jxscout-item",
-          "group": "1_modification"
+          "type": "webview",
+          "id": "jxscoutFileView",
+          "name": "File Explorer",
+          "icon": "files"
         }
       ]
     },
     "commands": [
       {
-        "command": "jxscout-vscode.refreshAnalysis",
-        "title": "Refresh Analysis",
-        "icon": "$(refresh)",
-        "when": "view == jxscoutAnalysis"
+        "command": "jxscout.toggleScope",
+        "title": "Toggle project/file scope",
+        "icon": "$(list-tree)"
       },
       {
-        "command": "jxscout-vscode.openSettings",
-        "title": "Open jxscout Settings"
+        "command": "jxscout.navigateToMatch",
+        "title": "Navigate to match",
+        "icon": "$(arrow-right)"
       },
       {
-        "command": "jxscout-vscode.highlightAndJump",
-        "title": "Highlight and Jump to Code",
-        "when": "view == jxscoutAnalysis"
+        "command": "jxscout.copyValues",
+        "title": "Copy values",
+        "icon": "$(copy)"
       },
       {
-        "command": "jxscout-vscode.copySelectedItems",
-        "title": "Copy Selected Values",
-        "icon": "$(copy)",
-        "when": "view == jxscoutAnalysis"
+        "command": "jxscout.copyPaths",
+        "title": "Copy paths",
+        "icon": "$(copy)"
       },
       {
-        "command": "jxscout-vscode.handleKeyNavigation",
-        "title": "Handle Key Navigation",
-        "when": "view == jxscoutAnalysis"
+        "command": "jxscout.copyHostnames",
+        "title": "Copy hostnames",
+        "icon": "$(copy)"
+      },
+      {
+        "command": "jxscout.copyQueryParams",
+        "title": "Copy query params",
+        "icon": "$(copy)"
+      },
+      {
+        "command": "jxscout.toggleSortMode",
+        "title": "Toggle sort mode",
+        "icon": "$(sort-precedence)"
       }
     ],
-    "keybindings": [
-      {
-        "command": "jxscout-vscode.handleKeyNavigation",
-        "key": "up",
-        "when": "view == jxscoutAnalysis && !inputFocus"
-      },
-      {
-        "command": "jxscout-vscode.handleKeyNavigation",
-        "key": "down",
-        "when": "view == jxscoutAnalysis && !inputFocus"
-      },
-      {
-        "command": "jxscout-vscode.copySelectedItems",
-        "key": "ctrl+c",
-        "when": "view == jxscoutAnalysis && !inputFocus"
-      },
-      {
-        "command": "jxscout-vscode.copySelectedItems",
-        "key": "cmd+c",
-        "when": "view == jxscoutAnalysis && !inputFocus"
-      }
-    ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "jxscout.toggleScope",
+          "when": "view == jxscoutAstView",
+          "group": "navigation"
+        },
+        {
+          "command": "jxscout.toggleScope",
+          "when": "view == jxscoutFileView",
+          "group": "navigation"
+        },
+        {
+          "command": "jxscout.toggleSortMode",
+          "when": "view == jxscoutAstView",
+          "group": "navigation"
+        },
+        {
+          "command": "jxscout.toggleScope",
+          "when": "view == jxscoutPremiumView",
+          "group": "navigation"
+        },
+        {
+          "command": "jxscout.toggleSortMode",
+          "when": "view == jxscoutPremiumView",
+          "group": "navigation"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "jxscout.copyValues",
+          "when": "view == jxscoutAstView",
+          "group": "1_modification"
+        },
+        {
+          "command": "jxscout.copyPaths",
+          "when": "view == jxscoutAstView",
+          "group": "1_modification"
+        },
+        {
+          "command": "jxscout.copyQueryParams",
+          "when": "view == jxscoutAstView",
+          "group": "1_modification"
+        },
+        {
+          "command": "jxscout.copyHostnames",
+          "when": "view == jxscoutAstView",
+          "group": "1_modification"
+        }
+      ]
+    },
     "configuration": {
       "title": "jxscout",
       "properties": {
         "jxscout.serverHost": {
           "type": "string",
           "default": "localhost",
-          "description": "Hostname of the jxscout WebSocket server"
+          "description": "Hostname where jxscout is running"
         },
         "jxscout.serverPort": {
           "type": "number",
           "default": 3333,
-          "description": "Port of the jxscout WebSocket server"
+          "description": "Port where jxscout is running"
         }
       }
     }
@@ -123,27 +164,20 @@
     "watch:esbuild": "node esbuild.js --watch",
     "watch:tsc": "tsc --noEmit --watch --project tsconfig.json",
     "package": "npm run check-types && npm run lint && node esbuild.js --production",
-    "compile-tests": "tsc -p . --outDir out",
-    "watch-tests": "tsc -p . -w --outDir out",
-    "pretest": "npm run compile-tests && npm run compile && npm run lint",
     "check-types": "tsc --noEmit",
-    "lint": "eslint src",
-    "test": "vscode-test"
+    "lint": "eslint src"
   },
   "dependencies": {
     "uuid": "^9.0.1",
     "ws": "^8.18.1"
   },
   "devDependencies": {
-    "@types/mocha": "^10.0.10",
     "@types/node": "20.x",
-    "@types/uuid": "^9.0.8",
-    "@types/vscode": "^1.99.0",
+    "@types/uuid": "^10.0.0",
+    "@types/vscode": "^1.92.0",
     "@types/ws": "^8.18.1",
     "@typescript-eslint/eslint-plugin": "^8.28.0",
     "@typescript-eslint/parser": "^8.28.0",
-    "@vscode/test-cli": "^0.0.10",
-    "@vscode/test-electron": "^2.4.1",
     "esbuild": "^0.25.1",
     "eslint": "^9.23.0",
     "npm-run-all": "^4.1.5",
