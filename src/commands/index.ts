@@ -85,8 +85,7 @@ export function registerCommands(
 
       const values = selectedItems
         .filter((item) => item.node.type === "match")
-        .map((item) => item.node.data.value)
-        .join("\n");
+        .map((item) => item.node.data.value);
 
       const uniqueValues = new Set(values);
 
