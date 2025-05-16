@@ -19,7 +19,7 @@ export function createViews(
   });
 
   // Initial titles
-  astView.title = "AST Analysis (File)";
+  astView.title = "Descriptors (File)";
 
   // Register active editor change handler
   const editorChangeDisposable = vscode.window.onDidChangeActiveTextEditor(
@@ -64,7 +64,7 @@ async function updateASTAnalysis(
       analysisTreeProvider.setState("asset-not-found");
     } else {
       vscode.window.showErrorMessage(
-        `Failed to get AST analysis: ${error.message}`
+        `Failed to get descriptors: ${error.message}`
       );
       analysisTreeProvider.setState("empty");
     }
