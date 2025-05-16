@@ -118,12 +118,12 @@ export class AstAnalysisTreeProvider
     if (this._state === "empty") {
       return Promise.resolve([
         new AstAnalysisTreeItem({
-          label: "Select a file tracked by jxscout to check for descriptors.",
+          label: "Select a file tracked by jxscout.",
           collapsibleState: vscode.TreeItemCollapsibleState.None,
           iconName: "info",
           node: {
             type: "navigation",
-            label: "Select a file tracked by jxscout to check for descriptors.",
+            label: "Select a file tracked by jxscout.",
           },
         }),
       ]);

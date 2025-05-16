@@ -21,6 +21,14 @@ export function createViews(
   // Initial titles
   astView.title = "Descriptors (File)";
 
+  // Check for active editor during initialization after WebSocket is ready
+  wsClient.onReady().then(() => {
+    const activeEditor = vscode.window.activeTextEditor;
+    if (activeEditor) {
+      updateASTAnalysis(activeEditor, analysisTreeProvider, wsClient);
+    }
+  });
+
   // Register active editor change handler
   const editorChangeDisposable = vscode.window.onDidChangeActiveTextEditor(
     async (editor) => {
