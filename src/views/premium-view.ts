@@ -105,7 +105,7 @@ export class PremiumView {
                 <h1>Unlock Advanced Features</h1>
                 
                 <ul class="features">
-                    <li>Project level AST analysis</li>
+                    <li>Project level descriptors</li>
                     <li>Enchanced project navigation</li>
                     <li>Visualize HTML, JS and Source Map relationships</li>
                 </ul>

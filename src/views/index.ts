@@ -19,7 +19,15 @@ export function createViews(
   });
 
   // Initial titles
-  astView.title = "AST Analysis (File)";
+  astView.title = "Descriptors (File)";
+
+  // Check for active editor during initialization after WebSocket is ready
+  wsClient.onReady().then(() => {
+    const activeEditor = vscode.window.activeTextEditor;
+    if (activeEditor) {
+      updateASTAnalysis(activeEditor, analysisTreeProvider, wsClient);
+    }
+  });
 
   // Register active editor change handler
   const editorChangeDisposable = vscode.window.onDidChangeActiveTextEditor(
@@ -64,7 +72,7 @@ async function updateASTAnalysis(
       analysisTreeProvider.setState("asset-not-found");
     } else {
       vscode.window.showErrorMessage(
-        `Failed to get AST analysis: ${error.message}`
+        `Failed to get descriptors: ${error.message}`
       );
       analysisTreeProvider.setState("empty");
     }

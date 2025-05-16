@@ -6,7 +6,7 @@
     "type": "git",
     "url": "https://github.com/jxscout/jxscout-vscode"
   },
-  "version": "0.0.3",
+  "version": "0.0.4",
   "publisher": "jxscout",
   "engines": {
     "vscode": "^1.92.0"
@@ -34,14 +34,14 @@
         {
           "type": "tree",
           "id": "jxscoutAstView",
-          "name": "AST Analysis",
+          "name": "Descriptors",
           "icon": "symbol-structure",
           "when": "scope == file"
         },
         {
           "type": "webview",
           "id": "jxscoutPremiumView",
-          "name": "AST Analysis",
+          "name": "Descriptors",
           "icon": "symbol-structure",
           "when": "scope == project"
         },

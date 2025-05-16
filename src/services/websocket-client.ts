@@ -41,9 +41,23 @@ export class WebSocketClient {
   private reconnectTimeout: NodeJS.Timeout | null = null;
   private readonly reconnectDelay = 5000; // 5 seconds
   private serverUrl: string;
+  private readyPromise: Promise<void> | null = null;
 
   constructor(serverUrl: string) {
     this.serverUrl = serverUrl;
+  }
+
+  onReady(): Promise<void> {
+    if (!this.readyPromise) {
+      this.readyPromise = new Promise((resolve) => {
+        if (this.ws?.readyState === WebSocket.OPEN) {
+          resolve();
+        } else {
+          this.ws?.once("open", () => resolve());
+        }
+      });
+    }
+    return this.readyPromise;
   }
 
   updateServerUrl(newServerUrl: string): void {

@@ -1,6 +1,6 @@
 # jxscout-vscode
 
-A VSCode extension for integrating with [jxscout](https://github.com/francisconeves97/jxscout), a tool that automatically saves JS files and performs AST analysis.
+A VSCode extension for integrating with [jxscout](https://github.com/francisconeves97/jxscout), a tool that automatically saves JS files and extracts relevant code.
 
 ## Features
 

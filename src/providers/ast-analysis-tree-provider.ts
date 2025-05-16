@@ -7,7 +7,6 @@ import {
   SortMode,
 } from "../types";
 import * as path from "path";
-import * as fs from "fs";
 
 export class AstAnalysisTreeItem extends vscode.TreeItem {
   public readonly node: ASTAnalyzerTreeNode;
@@ -69,7 +68,7 @@ export class AstAnalysisTreeProvider
 
   private _scope: ViewScope = "file";
   private _analysisData?: ASTAnalyzerTreeNode[];
-  private _state: TreeState = "loading";
+  private _state: TreeState = "empty";
   private _sortMode: SortMode = "occurrence";
 
   getScope(): ViewScope {
@@ -117,7 +116,17 @@ export class AstAnalysisTreeProvider
     }
 
     if (this._state === "empty") {
-      return Promise.resolve([]);
+      return Promise.resolve([
+        new AstAnalysisTreeItem({
+          label: "Select a file tracked by jxscout.",
+          collapsibleState: vscode.TreeItemCollapsibleState.None,
+          iconName: "info",
+          node: {
+            type: "navigation",
+            label: "Select a file tracked by jxscout.",
+          },
+        }),
+      ]);
     }
 
     if (this._state === "loading") {
@@ -151,12 +160,12 @@ export class AstAnalysisTreeProvider
     if (!this._analysisData?.length) {
       return Promise.resolve([
         new AstAnalysisTreeItem({
-          label: "No AST Analysis matches found",
+          label: "No descriptors found",
           collapsibleState: vscode.TreeItemCollapsibleState.None,
           iconName: "info",
           node: {
             type: "navigation",
-            label: "No AST Analysis matches found",
+            label: "No descriptors found",
           },
         }),
       ]);

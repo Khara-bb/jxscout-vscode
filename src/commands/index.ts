@@ -44,7 +44,7 @@ export function registerCommands(
           ? "occurrence"
           : "alphabetical";
       analysisTreeProvider.setSortMode(newSortMode);
-      astView.title = `AST Analysis x(${analysisTreeProvider.getScope()}) - ${
+      astView.title = `Descriptors (${analysisTreeProvider.getScope()}) - ${
         newSortMode === "alphabetical" ? "A-Z" : "By Occurrence"
       }`;
     }
@@ -199,7 +199,7 @@ export function registerCommands(
   );
 
   function updateViewTitles(scope: ViewScope) {
-    astView.title = `AST Analysis (${scope})`;
+    astView.title = `Descriptors (${scope})`;
     if (fileView) {
       fileView.title = `File Explorer (${scope})`;
     }
