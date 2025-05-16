@@ -3,8 +3,18 @@ import { WebSocketClient } from "./services/websocket-client";
 import { createViews } from "./views";
 import { registerCommands } from "./commands";
 import { PremiumView } from "./views/premium-view";
+import { VersionCheckService } from "./services/versionCheck";
 
 export function activate(context: vscode.ExtensionContext) {
+  // Initialize version check service
+  const versionCheckService = VersionCheckService.getInstance();
+  versionCheckService.start();
+  context.subscriptions.push({
+    dispose: () => {
+      versionCheckService.stop();
+    },
+  });
+
   // Initialize WebSocket client
   const config = vscode.workspace.getConfiguration("jxscout");
   const host = config.get<string>("serverHost") || "localhost";
