@@ -1,4 +1,4 @@
-name: 🚀 Release VS Code Extension
+name: "🚀 Release VS Code Extension"
 
 on:
   workflow_dispatch:
