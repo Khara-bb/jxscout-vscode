@@ -5,7 +5,7 @@ const CHECK_INTERVAL = 60 * 60 * 1000; // 1 hour in milliseconds
 const GITHUB_API_URL =
   "https://api.github.com/repos/francisconeves97/jxscout-vscode/releases/latest";
 const GITHUB_RELEASES_URL =
-  "https://github.com/francisconeves97/jxscout-vscode/releases";
+  "https://github.com/khara-bb/jxscout-vscode/releases";
 
 export class VersionCheckService {
   private static instance: VersionCheckService;
